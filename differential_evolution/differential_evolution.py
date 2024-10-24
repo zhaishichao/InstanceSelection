@@ -48,11 +48,12 @@ class DifferentialEvolution:
     def cross(self, x, v):
         u = np.zeros((self.NP, self.D))
         rate = np.random.rand()
-        for i in range(0, x.shape[1]):
-            if rate <= self.CR or i == rate:
-                u[:, i] = v[:, i]
-            else:
-                u[:, i] = x[:, i]
+        for i in range(0, x.shape[0]):
+            for j in range(0, x.shape[1]):
+                if rate <= self.CR or j == np.random.randint(x.shape[1]):
+                    u[i, j] = v[i, j]
+                else:
+                    u[i, j] = x[i, j]
         return u
 
     # 边界处理
