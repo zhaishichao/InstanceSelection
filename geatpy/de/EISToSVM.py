@@ -59,7 +59,6 @@ class EISToSVM(ea.Problem):
         classes_indices：二维ndarray，第一维表示每种类别，第二维表示此类别的实例索引。
         counts：二维ndarray，第一维表示每种类别，第二维表示此类别的数量。
     """
-
     def get_classes_indices_counts(self):
         # 统计每个类别的个数，y.max()+1是类别的个数
         num_class = self.y_train.max() + 1
@@ -75,16 +74,14 @@ class EISToSVM(ea.Problem):
     """
     2、根据种群个体的实值编码，获取被选择的个体的索引
     """
-
     def get_indices(self,xi):
         xi = np.round(xi)  # 数据范围在0-1之间，转化成int的同时会舍去小数部分，从而将个体映射到0-1编码
         indices = np.where(xi == 1)  # 1代表选择该实例，返回值是tuple，tuple[0]取元组中的第一个元素
         return indices[0]
 
     """
-    3、由索引得到实例子集（同时保证子集的最小数量）
+    3、由索引得到实例子集（同时保证实例子集中某类被选择的最小数量）
     """
-
     def get_sub_dataset(self, xi, indices):
         # 根据索引得到实例子集
         num_class = len(self.classes)
@@ -114,7 +111,9 @@ class EISToSVM(ea.Problem):
                     y_sub = np.insert(y_sub, index, self.y_train[random_selecte_indices[j]])
         return x_sub, y_sub, xi
 
-    # 适应度函数/目标函数
+    """
+    4、获取模型的训练结果，得到目标函数值
+    """
     def objective_function(self, xi):  # xi表示种群的个体
         # 先将xi的实值编码四舍五入得到0-1编码，根据编码得到选择的实例索引
         indices = self.get_indices(xi)

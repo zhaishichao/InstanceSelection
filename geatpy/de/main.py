@@ -3,13 +3,14 @@ import geatpy as ea  # import geatpy
 import numpy as np
 import scipy.io as sio  # 从.mat文件中读取数据集
 from EISToSVM import EISToSVM # 导入自定义问题接口
+from utils.dataset_utils import get__counts
 
 """============================实例化问题对象========================"""
 
 # 加载数据集
 
 # 读取.mat文件
-mat_data = sio.loadmat('../../data/dataset/Australian.mat')
+mat_data = sio.loadmat('../../data/dataset/CNS.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0] # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
@@ -21,7 +22,11 @@ counts = np.zeros(dataset_y.max() + 1)
 for i in range(dataset_y.shape[0]):
     counts[dataset_y[i]] += 1
 print("每种类别的数量：", counts)
+
 problem = EISToSVM(dataset_x,dataset_y,random_state=42)  # 实例化问题对象
+print("训练集的实例数量：", problem.y_train.shape[0])
+print("每种类别的数量：",problem.counts)
+print("训练集：",problem.y_train)
 """==============================种群设置==========================="""
 Encoding = 'RI'  # 编码方式
 NIND = 50  # 种群规模
@@ -34,7 +39,7 @@ myAlgorithm = ea.soea_DE_best_1_L_templet(problem, population)  # 实例化一�
 myAlgorithm.MAXGEN = 100  # 最大进化代数
 myAlgorithm.mutOper.F = 0.5  # 差分进化中的参数F
 myAlgorithm.recOper.XOVR = 0.7  # 设置交叉概率
-myAlgorithm.logTras = 1  # 置每隔多少代记录日志，若设置成0则表示不记录日志
+myAlgorithm.logTras = 0  # 置每隔多少代记录日志，若设置成0则表示不记录日志
 myAlgorithm.verbose = True  # 设置是否打印输出日志信息
 myAlgorithm.drawing = 1  # 设置绘图方式（0：不绘图；1：绘制结果图；2：绘制目标空间过程动画；3：绘制决策空间过程动画）
 
@@ -46,8 +51,17 @@ print('评价次数：%s' % myAlgorithm.evalsNum)
 print('时间已过%s 秒' % myAlgorithm.passTime)
 if BestIndi.sizes != 0:
     print('最优的目标函数值为：%s' % BestIndi.ObjV[0][0])
+
+    print(f"最优个体的表现型：{BestIndi.Phen[0].shape[0]}",np.round(BestIndi.Phen[0]))
+
+
+    indices=problem.get_indices(BestIndi.Phen[0])
+    print("最优个体的对应的实例选择的索引",indices)
+    _,y_sub,_=problem.get_sub_dataset(BestIndi.Phen[0],indices)
+    counts=get__counts(y_sub)
+    print("最优实例子集：",y_sub)
+    print("每个类别的数量：",counts)
     print('最优的控制变量值为：')
-    for i in range(BestIndi.Phen.shape[1]):
-        print(BestIndi.Phen[0, i])
+    print(BestIndi.Phen[0])
 else:
     print('没找到可行解。')

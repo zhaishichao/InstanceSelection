@@ -15,3 +15,15 @@ def get_classes_indexes_counts(y,output=False):
     if output :
         print("每种类别的数量：", counts)
     return classes, counts
+
+
+# 得到分类、以及分类所对应的数量
+def get__counts(y,output=False):
+    # 统计每个类别的个数，y.max()+1是类别的个数
+    num_class = y.max() + 1
+    counts = np.zeros(num_class, dtype=int)
+    for i in range(y.shape[0]):  # y.shape[0]相当于y的长度
+        counts[y[i]] += 1
+    if output :
+        print("每种类别的数量：", counts)
+    return counts
