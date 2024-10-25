@@ -1,2 +1,4 @@
 .idea
-data
+**/data
+**/Population Info
+**/Trace Plot.svg
