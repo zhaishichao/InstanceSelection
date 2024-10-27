@@ -9,6 +9,11 @@ from deap import tools
 
 def Sum_Of_Squares(x): # x的维度为10，也即D=10
     return [sum(xi ** 2 for xi in x )]
+
+
+
+
+
 def mutDE(y, a, b, c, f):
     size = len(y)
     for i in range(len(y)):
@@ -49,7 +54,7 @@ toolbox.register("evaluate", Sum_Of_Squares)
 def main():
     # Differential evolution parameters
     MU = 5 * 10
-    NGEN = 200
+    NGEN = 8000
 
     pop = toolbox.population(n=MU);
     hof = tools.HallOfFame(1)
@@ -92,7 +97,7 @@ def main():
         hof.update(pop)
         record = stats.compile(pop)
         logbook.record(gen=g, evals=len(pop), **record)
-        print(logbook.stream)
+        #print(logbook.stream)
 
     print("Best individual is ", hof[0])
     print("with fitness", hof[0].fitness.values[0])
