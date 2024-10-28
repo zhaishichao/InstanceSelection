@@ -12,10 +12,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from tqdm import tqdm
 
-from deap_framework.de.fitness import objective_function
+from deap_framework.de.fitness import objective_function, get_sub_dataset, get_indices, get_classes_indexes_counts
+from utils.dataset_utils import get__counts
 
 # 数据集
-mat_data = sio.loadmat('../../data/dataset/German.mat')
+mat_data = sio.loadmat('../../data/dataset/Australian.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
@@ -77,13 +78,14 @@ toolbox.register("evaluate", SVM_Error_Rate)
 
 def main():
     # Differential evolution parameters
-    RUN = 20
+    RUN = 1
     with tqdm(total=RUN, desc="DE") as pbar:
         for i in range(RUN):
             NUM_POP = 50
             NGEN = 100
             x_train, x_test, y_train, y_test = train_test_split(dataset_x, dataset_y, test_size=0.3,
                                                                 random_state=np.random.randint(RUN))
+            get__counts(y_train,True)
             pop = toolbox.population(n=NUM_POP);
             hof = tools.HallOfFame(1)
 
@@ -113,7 +115,6 @@ def main():
                 hof.update(pop)
 
             print("Best individual is ", hof[0])
-            print("Best individual is ", len(hof[0]))
             print("with fitness", hof[0].fitness.values[0])
             pbar.set_postfix({
                 "当前迭代次数": i + 1,
@@ -121,7 +122,15 @@ def main():
             })
             # 更新进度条
             pbar.update(1)
-
+            pop_best=np.round(hof[0]).astype(int)
+            print(pop_best)
+            get__counts(pop_best)
+            classes, counts = get_classes_indexes_counts(y_train)
+            x_best_sub, y_best_sub, xi = get_sub_dataset(pop_best, get_indices(pop_best), x_train, y_train, classes,
+                                                         2)
+            classes_x_best, counts_x_best = get_classes_indexes_counts(y_best_sub)
+            print("最优实例子集各分类数量：", counts_x_best)
+            print(str(counts_x_best) + "haha")
 
 if __name__ == "__main__":
     main()
