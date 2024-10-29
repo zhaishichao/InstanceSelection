@@ -6,6 +6,7 @@ import numpy as np
 from deap import base
 from deap import creator
 from deap import tools
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -16,7 +17,7 @@ from deap_framework.de.fitness import objective_function, get_sub_dataset, get_i
 from utils.dataset_utils import get__counts
 
 # 数据集
-mat_data = sio.loadmat('../../data/dataset/Australian.mat')
+mat_data = sio.loadmat('../../data/dataset/CNS.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
@@ -61,6 +62,8 @@ def cxBinomial(x, y, cr):
             x[i] = y[i]
     return x
 
+#def init_pop(low,high,)
+
 IND_DIM = x_train.shape[0]
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -75,12 +78,16 @@ toolbox.register("mate", cxBinomial, cr=0.8)
 toolbox.register("select", tools.selRandom, k=3)
 toolbox.register("evaluate", SVM_Error_Rate)
 
+save_path="C://Users//zsc//Desktop//evolution computation//experiment//imgs"
 
 def main():
     # Differential evolution parameters
-    RUN = 1
+    RUN = 10
+    per_generation_best_instances_counts=[]
+    per_generation_beat_average_fitness=[]
     with tqdm(total=RUN, desc="DE") as pbar:
         for i in range(RUN):
+            print(f"######################第{i+1}次迭代开始#########################")
             NUM_POP = 50
             NGEN = 100
             x_train, x_test, y_train, y_test = train_test_split(dataset_x, dataset_y, test_size=0.3,
@@ -114,7 +121,7 @@ def main():
 
                 hof.update(pop)
 
-            print("Best individual is ", hof[0])
+            #print("Best individual is ", hof[0])
             print("with fitness", hof[0].fitness.values[0])
             pbar.set_postfix({
                 "当前迭代次数": i + 1,
@@ -123,14 +130,29 @@ def main():
             # 更新进度条
             pbar.update(1)
             pop_best=np.round(hof[0]).astype(int)
-            print(pop_best)
+            #print(pop_best)
             get__counts(pop_best)
             classes, counts = get_classes_indexes_counts(y_train)
             x_best_sub, y_best_sub, xi = get_sub_dataset(pop_best, get_indices(pop_best), x_train, y_train, classes,
                                                          2)
             classes_x_best, counts_x_best = get_classes_indexes_counts(y_best_sub)
             print("最优实例子集各分类数量：", counts_x_best)
-            print(str(counts_x_best) + "haha")
+            per_generation_best_instances_counts.append(str(counts_x_best))
+            per_generation_beat_average_fitness.append(round(1 - hof[0].fitness.values[0],4)*100)
 
+    # 设置可显示中文宋体
+    plt.rcParams['font.family'] = 'STZhongsong'
+    name="CNS"
+    plt.title("DataSet: "+name)
+    plt.xlabel("Best Instance Selection")
+    plt.ylabel("Average accuracy (%)")
+    # plt.grid(ls="--", alpha=0.5)
+    plt.bar(per_generation_best_instances_counts, per_generation_beat_average_fitness, width=0.8)
+    plt.tick_params(axis='x', labelsize=7)
+    for a, b in zip(per_generation_best_instances_counts, per_generation_beat_average_fitness):
+        plt.text(a, b + 0.1, '%.2f' % b, ha='center', va='bottom', fontsize=7)
+    plt.savefig(save_path+"//"+name, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"平均准确率：{np.mean(per_generation_beat_average_fitness)}")
 if __name__ == "__main__":
     main()

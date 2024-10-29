@@ -10,7 +10,7 @@ from utils.dataset_utils import get__counts
 # 加载数据集
 
 # 读取.mat文件
-mat_data = sio.loadmat('../../data/dataset/German.mat')
+mat_data = sio.loadmat('../../data/dataset/Australian.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0] # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]

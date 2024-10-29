@@ -1,5 +1,5 @@
 import imageio
-
+import matplotlib.pyplot as plt
 # 图像转换成视频
 def convert_images_to_video(input_path, output_path, videofilename, size=800):
     '''
@@ -20,3 +20,13 @@ def convert_images_to_video(input_path, output_path, videofilename, size=800):
             image = imageio.imread(filename)
             writer.append_data(image)
 
+def histogram(x,data,title,save_path):
+    # 设置可显示中文宋体
+    plt.rcParams['font.family'] = 'STZhongsong'
+    plt.title(title)
+    # plt.grid(ls="--", alpha=0.5)
+    plt.bar(x, data, width=0.4)
+    for a, b in zip(x, data):
+        plt.text(a, b + 0.1, '%.0f' % b, ha='center', va='bottom', fontsize=12)
+    plt.savefig(save_path,dpi=300, bbox_inches='tight')
+    plt.close()
