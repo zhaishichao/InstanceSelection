@@ -17,7 +17,7 @@ from deap_framework.de.fitness import objective_function, get_sub_dataset, get_i
 from utils.dataset_utils import get__counts
 
 # 数据集
-mat_data = sio.loadmat('../../data/dataset/CNS.mat')
+mat_data = sio.loadmat('../../data/dataset/Australian.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
@@ -34,7 +34,11 @@ print("每种类别的数量：", counts)
 model = make_pipeline(StandardScaler(), SVC(kernel='linear', cache_size=600))  # 'linear' 是线性核，也可以选择 'rbf', 'poly' 等核函数
 x_train, x_test, y_train, y_test = train_test_split(dataset_x, dataset_y, test_size=0.3, random_state=42)
 
-
+# 采用指数分布
+def generate_random_numbers(scale,size):
+    random_numbers = np.random.exponential(scale=scale, size=size)
+    clipped_numbers = np.clip(random_numbers, 0, 1)
+    return clipped_numbers[0]
 def Sum_Of_Squares(x):  # x的维度为10，也即D=10
     return [sum(xi ** 2 for xi in x)]
 
@@ -69,12 +73,12 @@ IND_DIM = x_train.shape[0]
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array, typecode='d', fitness=creator.FitnessMin)
 toolbox = base.Toolbox()
-toolbox.register("attr_float", random.uniform, 0, 1)
+toolbox.register("attr_float", generate_random_numbers, 3, 1)
 toolbox.register("individual", tools.initRepeat, creator.Individual,
                  toolbox.attr_float, n=IND_DIM)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("mutate", mutDE, f=0.8)
-toolbox.register("mate", cxBinomial, cr=0.8)
+toolbox.register("mutate", mutDE, f=0.5)
+toolbox.register("mate", cxBinomial, cr=0.9)
 toolbox.register("select", tools.selRandom, k=3)
 toolbox.register("evaluate", SVM_Error_Rate)
 
@@ -82,7 +86,8 @@ save_path="C://Users//zsc//Desktop//evolution computation//experiment//imgs"
 
 def main():
     # Differential evolution parameters
-    RUN = 10
+    RUN = 20
+    per_genera_best_individual = []
     per_generation_best_instances_counts=[]
     per_generation_beat_average_fitness=[]
     with tqdm(total=RUN, desc="DE") as pbar:
@@ -130,6 +135,8 @@ def main():
             # 更新进度条
             pbar.update(1)
             pop_best=np.round(hof[0]).astype(int)
+            per_genera_best_individual.append(pop_best)
+
             #print(pop_best)
             get__counts(pop_best)
             classes, counts = get_classes_indexes_counts(y_train)
@@ -142,7 +149,7 @@ def main():
 
     # 设置可显示中文宋体
     plt.rcParams['font.family'] = 'STZhongsong'
-    name="CNS"
+    name="Australian2"
     plt.title("DataSet: "+name)
     plt.xlabel("Best Instance Selection")
     plt.ylabel("Average accuracy (%)")
@@ -153,6 +160,7 @@ def main():
         plt.text(a, b + 0.1, '%.2f' % b, ha='center', va='bottom', fontsize=7)
     plt.savefig(save_path+"//"+name, dpi=300, bbox_inches='tight')
     plt.close()
+    per_genera_best_individual = np.array(per_genera_best_individual)
     print(f"平均准确率：{np.mean(per_generation_beat_average_fitness)}")
 if __name__ == "__main__":
     main()
