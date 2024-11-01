@@ -1,5 +1,5 @@
 """MyProblemMain.py"""
-import geatpy as ea  # import geatpy
+import geatpy as ea  # import geatpy_framework
 import numpy as np
 import scipy.io as sio  # 从.mat文件中读取数据集
 from EISToSVM import EISToSVM # 导入自定义问题接口

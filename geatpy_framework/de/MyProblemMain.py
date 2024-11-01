@@ -1,5 +1,5 @@
 """MyProblemMain.py"""
-import geatpy as ea  # import geatpy
+import geatpy as ea  # import geatpy_framework
 from MyProblem import MyProblem  # 导入自定义问题接口
 
 """============================实例化问题对象========================"""
