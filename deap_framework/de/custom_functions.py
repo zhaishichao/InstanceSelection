@@ -1,14 +1,24 @@
+from random import random
+
 import numpy as np
 from sklearn.metrics import accuracy_score
 
-
+# 获取被选择实例的索引
 def get_indices(xi):
+    '''
+    :param xi: xi是一个个体（用实值进行编码）
+    :return: 被选择实例的索引
+    '''
     xi = np.round(xi)  # 数据范围在0-1之间，转化成int的同时会舍去小数部分，从而将个体映射到0-1编码
     indices = np.where(xi == 1)  # 1代表选择该实例，返回值是tuple，tuple[0]取元组中的第一个元素
     return indices[0]
 
-
+# 对标签进行分析，得到类别的分布
 def get_classes_indexes_counts(y):
+    '''
+    :param y: 标签
+    :return: 返回每个类别对应的索引，每个类别对应的数量
+    '''
     # 统计每个类别的个数，y.max()+1是类别的个数
     num_class = y.max() + 1
     counts = np.zeros(num_class, dtype=int)
@@ -20,8 +30,17 @@ def get_classes_indexes_counts(y):
         classes.append(np.where(y == i)[0])
     return classes, counts
 
-
+# 获得个体对应的实例子集的集合
 def get_sub_dataset(xi, indices, x, y, classes, minimum):
+    '''
+    :param xi: 当前个体
+    :param indices: 所有被选择的索引
+    :param x: 实例集合
+    :param y: 标签集合
+    :param classes: 类别及其对应的索引
+    :param minimum: 类别被选择的实例数量，通常为最小类别数量的一半
+    :return:
+    '''
     # 根据索引得到实例子集
     num_class = len(classes)
     x_sub = x[indices, :]
@@ -78,3 +97,34 @@ def fitness(x, model, x_train, y_train, x_test, y_test, minimum):  # x表示种�
     for i in range(0, x.shape[0]):
         result[i] = objective_function(x[i, :], x_train, y_train, x_test, y_test, model, minimum)
     return result
+
+
+# 种群初始化采用指数分布
+def generate_random_numbers(scale,size):
+    random_numbers = np.random.exponential(scale=scale, size=size)
+    clipped_numbers = np.clip(random_numbers, 0, 1)
+    return clipped_numbers[0]
+def Sum_Of_Squares(x):  # x的维度为10，也即D=10
+    return [sum(xi ** 2 for xi in x)]
+
+
+
+
+
+def mutDE(y, a, b, c, f):
+    for i in range(len(y)):
+        y[i] = a[i] + f * (b[i] - c[i])
+        if y[i] > 1:
+            y[i] = 1
+        if y[i] < 0:
+            y[i] = 0
+    return y
+
+
+def cxBinomial(x, y, cr):
+    size = len(x)
+    index = random.randrange(size)
+    for i in range(size):
+        if i == index or random.random() < cr:
+            x[i] = y[i]
+    return x
