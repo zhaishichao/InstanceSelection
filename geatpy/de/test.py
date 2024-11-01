@@ -1,4 +1,4 @@
-"""main.py"""
+"""MyProblemMain.py"""
 import geatpy as ea  # import geatpy
 import numpy as np
 import scipy.io as sio  # 从.mat文件中读取数据集

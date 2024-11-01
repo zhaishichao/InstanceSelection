@@ -1,6 +1,6 @@
-"""main.py"""
+"""MyProblemMain.py"""
 import geatpy as ea  # import geatpy
-from test import MyProblem  # 导入自定义问题接口
+from MyProblem import MyProblem  # 导入自定义问题接口
 
 """============================实例化问题对象========================"""
 problem = MyProblem()  # 实例化问题对象
