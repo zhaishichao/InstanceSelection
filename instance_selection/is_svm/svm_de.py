@@ -17,7 +17,7 @@ from utils.dataset_utils import get__counts
 
 ################################################################加载数据集################################################
 # 数据集
-mat_data = sio.loadmat('../../data/dataset/Australian.mat')
+mat_data = sio.loadmat('../../data/dataset/CNS.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
@@ -43,7 +43,7 @@ save_path="C://Users//zsc//Desktop//evolution computation//experiment//imgs"
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array, typecode='d', fitness=creator.FitnessMin)
 toolbox = base.Toolbox()
-toolbox.register("attr_float", generate_random_numbers, 3, 1)
+toolbox.register("attr_float", generate_random_numbers, 1, 1)
 toolbox.register("individual", tools.initRepeat, creator.Individual,
                  toolbox.attr_float, n=IND_DIM)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -54,7 +54,7 @@ toolbox.register("evaluate", SVM_Error_Rate)
 
 def main():
 
-    RUN = 20
+    RUN = 1
     per_genera_best_individual = []
     per_generation_best_instances_counts=[]
     per_generation_beat_average_fitness=[]
@@ -63,7 +63,7 @@ def main():
             print(f"######################第{i+1}次迭代开始#########################")
             NUM_POP = 50
             NGEN = 100
-            x_train, x_test, y_train, y_test = train_test_split(dataset_x, dataset_y, test_size=0.3,
+            x_train, x_test, y_train, y_test = train_test_split(dataset_x, dataset_y, test_size=0.2,
                                                                 random_state=np.random.randint(RUN))
             get__counts(y_train,True)
             pop = toolbox.population(n=NUM_POP);
@@ -91,7 +91,7 @@ def main():
                     if ind.fitness > pop[i].fitness:
                         pop[i] = ind
                 hof.update(pop)
-
+            print("最好的个体：",hof[0])
             print("with fitness", hof[0].fitness.values[0])
             pbar.set_postfix({
                 "当前迭代次数": i + 1,
