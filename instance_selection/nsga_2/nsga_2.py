@@ -54,9 +54,11 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.at
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 toolbox.register("evaluate", benchmarks.zdt1)
-toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
+# toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
+toolbox.register("mate", tools.cxOnePoint)
 toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
-toolbox.register("select", tools.selNSGA2)
+# toolbox.register("select", tools.selNSGA2)
+toolbox.register("select", tools.selTournament,tournsize=3)
 
 def main(seed=None):
     random.seed(seed)
@@ -93,7 +95,7 @@ def main(seed=None):
     # Begin the generational process
     for gen in range(1, NGEN):
         # Vary the population
-        offspring = tools.selTournamentDCD(pop, len(pop))
+        offspring = toolbox.select(pop, len(pop))
         offspring = [toolbox.clone(ind) for ind in offspring]
 
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
