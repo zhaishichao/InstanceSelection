@@ -57,7 +57,7 @@ toolbox.register("evaluate", benchmarks.zdt1)
 # toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
 toolbox.register("mate", tools.cxOnePoint)
 toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
-# toolbox.register("select", tools.selNSGA2)
+toolbox.register("select", tools.selNSGA2)
 toolbox.register("select", tools.selTournament,tournsize=3)
 
 def main(seed=None):
