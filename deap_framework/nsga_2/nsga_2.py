@@ -86,7 +86,7 @@ def main(seed=None):
 
     # This is just to assign the crowding distance to the individuals
     # no actual selection is done
-    pop = toolbox.select(pop, len(pop))
+    # pop = toolbox.select(pop, len(pop))
 
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(invalid_ind), **record)

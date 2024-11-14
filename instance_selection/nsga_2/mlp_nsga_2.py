@@ -119,7 +119,7 @@ def fitness_function(x_sub, y_sub, ensembles, index):
 import array
 import random
 import numpy
-from deap import base
+from deap import base, benchmarks
 from deap import creator
 from deap import tools
 
@@ -143,12 +143,12 @@ toolbox.register("attr_float", uniform, BOUND_LOW, BOUND_UP, NDIM)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr_float)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-# toolbox.register("evaluate", benchmarks.zdt1)
+toolbox.register("evaluate", benchmarks.zdt1)
 toolbox.register("evaluate", fitness_function)
 # toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
 toolbox.register("mate", tools.cxOnePoint)
 toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
-toolbox.register("select", tools.selNSGA2)
+# toolbox.register("select", tools.selNSGA2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 init_mlp = MLPClassifier(hidden_layer_sizes=(20,), max_iter=1000, random_state=42)
