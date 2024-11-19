@@ -157,7 +157,7 @@ init_mlp = MLPClassifier(hidden_layer_sizes=(20,), max_iter=1000, random_state=4
 def main(seed=None):
     random.seed(seed)
 
-    NGEN = 5
+    NGEN = 10
     MU = 30
     CXPB = 0.9
 
@@ -180,7 +180,7 @@ def main(seed=None):
     pop_y_sub = []  # 当前每个个体对应的实例选择的lable
     # 对于每个个体都训练得到一个mlp模型
     for i in range(len(pop)):
-        mlp = MLPClassifier(hidden_layer_sizes=(30,), max_iter=1000, random_state=42)
+        mlp = MLPClassifier(hidden_layer_sizes=(30,), max_iter=1000, random_state=42,learning_rate='constant',learning_rate_init=0.1)
         x_sub, y_sub = get_subset(pop[i])
         mlp.fit(x_sub, y_sub)
         ensembles.append(mlp)
@@ -213,7 +213,7 @@ def main(seed=None):
         pop_x_sub.clear()
         pop_y_sub.clear()
         for i in range(len(offspring)):
-            mlp = MLPClassifier(hidden_layer_sizes=(30,), max_iter=1000, random_state=42)
+            mlp = MLPClassifier(hidden_layer_sizes=(30,), max_iter=1000, random_state=42,learning_rate='constant',learning_rate_init=0.1)
             x_sub, y_sub = get_subset(offspring[i])
             mlp.fit(x_sub, y_sub)
             ensembles.append(mlp)
