@@ -65,7 +65,7 @@ def selNSGA2(individuals, k, nd='standard', x_test=None, y_test=None):
         sorted_front = sorted(pareto_fronts[-1], key=attrgetter("fitness.crowding_dist"), reverse=True)
         chosen.extend(sorted_front[:k])
 
-    return chosen
+    return chosen,pareto_fronts
 
 
 def sortNondominated(individuals, k, first_front_only=False):
