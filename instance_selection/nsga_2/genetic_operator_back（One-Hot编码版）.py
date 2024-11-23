@@ -143,10 +143,12 @@ def assignCrowdingDist(individuals, x_test, y_test):
     if len(individuals) == 0:
         return
     # Convert one-hot encoded test labels back to single class labels
+    y_test_labels = np.argmax(y_test, axis=1)
     binary_lists = []
     for ind in individuals:
         y_pred = ind.mlp.predict(x_test)
-        binary_list = [1 if x == y else 0 for x, y in zip(y_pred, y_test)]  # 0表示对应实例预测错误，1表示预测正确
+        y_pred_labels = np.argmax(y_pred, axis=1)
+        binary_list = [1 if x == y else 0 for x, y in zip(y_pred_labels, y_test_labels)]  # 0表示对应实例预测错误，1表示预测正确
         binary_lists.append(binary_list)
 
     accfailcred = [[0 for _ in range(len(individuals))] for _ in range(len(individuals))]
