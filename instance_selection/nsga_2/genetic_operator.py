@@ -15,7 +15,7 @@ import numpy as np
 
 def mutate_binary_inversion(individual, mutation_rate=0.2):
     num_genes = len(individual)  # 基因总数
-    num_mutation = math.ceil(random.uniform(0.01, mutation_rate) * num_genes)  # 要突变的总数
+    num_mutation = math.ceil(random.uniform(0.15, mutation_rate) * num_genes)  # 要突变的总数
     sampled_indices = random.sample(range(num_genes), num_mutation)  # 在num_genes个基因中随机采样num_mutation个
     for index in sampled_indices:
         if individual[index] == 0:
