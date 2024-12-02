@@ -142,7 +142,7 @@ def assignCrowdingDist(individuals, x_test, y_test):
     """
     if len(individuals) == 0:
         return
-    # Convert one-hot encoded test labels back to single class labels
+    # Convert one-hot encoded test labels backup to single class labels
     y_test_labels = np.argmax(y_test, axis=1)
     binary_lists = []
     for ind in individuals:

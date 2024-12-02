@@ -56,9 +56,9 @@ def selNSGA2(individuals, k, nd='standard', x_test=None, y_test=None):
         raise Exception('selNSGA2: The choice of non-dominated sorting '
                         'method "{0}" is invalid.'.format(nd))
 
-    for front in pareto_fronts:
-        assignCrowdingDist(front, x_test, y_test)
-
+    #for front in pareto_fronts:
+        #assignCrowdingDist(front, x_test, y_test)
+    assignCrowdingDist(individuals, x_test, y_test)
     chosen = list(chain(*pareto_fronts[:-1]))
     k = k - len(chosen)
     if k > 0:
@@ -142,28 +142,25 @@ def assignCrowdingDist(individuals, x_test, y_test):
     """
     if len(individuals) == 0:
         return
-    # Convert one-hot encoded test labels back to single class labels
-    binary_lists = []
+    pred_lists = [] # 每个个体的预测结果， 0表示对应实例预测错误，1表示预测正确
     for ind in individuals:
-        y_pred = ind.mlp.predict(x_test)
+        y_pred = ind.mlp.predict(x_test) # 模型预测结果
         binary_list = [1 if x == y else 0 for x, y in zip(y_pred, y_test)]  # 0表示对应实例预测错误，1表示预测正确
-        binary_lists.append(binary_list)
+        pred_lists.append(binary_list)
 
-    accfailcred = [[0 for _ in range(len(individuals))] for _ in range(len(individuals))]
+    accfailcred = [[0 for _ in range(len(individuals))] for _ in range(len(individuals))] #
     for i in range(len(individuals) - 1):
-        for j in range(1, len(individuals)):
+        count_zeros_i = sum(1 for x in pred_lists[i] if x == 0)
+        for j in range(i+1, len(individuals)):
             # 计算汉明距离
-            hamming_distance = sum(x != y for x, y in zip(binary_lists[i], binary_lists[j]))
-            count_zeros_i = sum(1 for x in binary_list if x == 0)
-            count_zeros_j = sum(1 for x in binary_list if x == 0)
+            hamming_distance = sum(x != y for x, y in zip(pred_lists[i], pred_lists[j]))
+            count_zeros_j = sum(1 for x in pred_lists[j] if x == 0)
             accfailcred[i][j] = 1.0 * hamming_distance / (count_zeros_i + count_zeros_j)
             accfailcred[j][i] = accfailcred[i][j]
-
-    # 使用列表推导式对每一行求和
-    row_sums_accfailcred = [sum(row) for row in accfailcred]
-
+    # 对每一行求和
+    row_sum_accfailcred = [sum(row) for row in accfailcred]
     for i in range(len(individuals)):
-        individuals[i].fitness.crowding_dist = 1.0 * row_sums_accfailcred[i] / len(individuals)
+        individuals[i].fitness.crowding_dist = 1.0 * row_sum_accfailcred[i] / (len(individuals)-1) # 使用PFC代替拥挤距离
 
 
 def selTournamentDCD(individuals, k):
