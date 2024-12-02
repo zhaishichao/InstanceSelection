@@ -45,7 +45,7 @@ def selNSGA2(individuals, k, nd='standard', x_test=None, y_test=None):
     :returns: A list of selected individuals.
 
     .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
-       non-dominated sorting genetic algorithm for multi-objective
+       non-dominated sorting genetic algorithm for multi_objective
        optimization: NSGA-II", 2002.
     """
     if nd == 'standard':
@@ -83,7 +83,7 @@ def sortNondominated(individuals, k, first_front_only=False):
               nondominated individuals.
 
     .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
-       non-dominated sorting genetic algorithm for multi-objective
+       non-dominated sorting genetic algorithm for multi_objective
        optimization: NSGA-II", 2002.
     """
     if k == 0:
