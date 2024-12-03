@@ -8,7 +8,54 @@ import random
 import numpy
 import numpy as np
 
+def exponential_distribution(lambda_, threshold):
+    '''
+    :param lambda_: 指数分布的参数λ（lambda）
+    :param threshold: 阈值（阈值决定了生成0或1）
+    :return:
+    '''
+    # 生成一个指数分布的随机数
+    value = random.expovariate(lambda_)
+    # 根据值与阈值的比较，生成 0 或 1
+    if value < threshold:
+        return 1
+    else:
+        return 0
 
+# 在种群中找到重复的个体
+def find_duplicates(pop, similar=0.9):
+    """
+    找到重复个体的索引。
+    :param arrays: 一个包含 array.array 的列表
+    :param threshold: 重复的判断阈值
+    :return: 重复对的索引列表
+    """
+    n = len(pop)
+    duplicates = []  # 用于记录重复对的索引
+
+    for i in range(n):
+        duplicate = ()
+        for j in range(i + 1, n):
+            # 当前两组数组
+            a = pop[i]
+            b = pop[j]
+
+            # 计算1的个数
+            ones_a = sum(a)
+            ones_b = sum(b)
+
+            # 如果其中一个数组全是0，不可能满足条件
+            if ones_a == 0 or ones_b == 0:
+                continue
+
+            # 计算交集中的1的数量
+            common_ones = sum(x == 1 & y == 1 for x, y in zip(a, b))
+
+            # 判断是否满足重复的定义
+            if (common_ones / ones_a > similar) and (common_ones / ones_b > similar):
+                duplicate = duplicate + (j,)
+        duplicates.append(duplicate)
+    return duplicates
 ######################################
 #      mutate(二进制随机反转)           #
 ######################################
@@ -24,6 +71,23 @@ def mutate_binary_inversion(individual, mutation_rate=0.2):
             individual[index] == 0
     return individual,
 
+######################################
+#               去重                  #
+######################################
+# 根据索引对，去除种群中重复的个体
+def remove_duplicates(pop, duplicates):
+    """
+    移除重复的个体。
+    :param arrays: 一个包含 array.array 的列表
+    :param duplicates: 重复对的索引列表
+    :return: 去重后的列表
+    """
+    # 找到所有需要移除的索引
+    to_remove = set()  # 只保留后出现的索引
+    for duplicate in duplicates:
+        to_remove.update(duplicate)  # update是用来更新set集合的
+    # 构造去重后的列表
+    return [pop[i] for i in range(len(pop)) if i not in to_remove], len(to_remove)
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
@@ -58,7 +122,8 @@ def selNSGA2(individuals, k, nd='standard', x_test=None, y_test=None):
 
     #for front in pareto_fronts:
         #assignCrowdingDist(front, x_test, y_test)
-    assignCrowdingDist(individuals, x_test, y_test)
+    # assignCrowdingDist(individuals, x_test, y_test)
+    assignCrowdingDist_PFC(individuals, x_test, y_test)
     chosen = list(chain(*pareto_fronts[:-1]))
     k = k - len(chosen)
     if k > 0:
@@ -131,11 +196,9 @@ def sortNondominated(individuals, k, first_front_only=False):
                         fronts[-1].extend(map_fit_ind[fit_d])
             current_front = next_front
             next_front = []
-
     return fronts
 
-
-def assignCrowdingDist(individuals, x_test, y_test):
+def assignCrowdingDist_PFC(individuals, x_test, y_test):
     """Assign a crowding distance to each individual's fitness. The
     crowding distance can be retrieve via the :attr:`crowding_dist`
     attribute of each individual's fitness.
@@ -162,7 +225,31 @@ def assignCrowdingDist(individuals, x_test, y_test):
     for i in range(len(individuals)):
         individuals[i].fitness.crowding_dist = 1.0 * row_sum_accfailcred[i] / (len(individuals)-1) # 使用PFC代替拥挤距离
 
+def assignCrowdingDist(individuals):
+    """Assign a crowding distance to each individual's fitness. The
+    crowding distance can be retrieve via the :attr:`crowding_dist`
+    attribute of each individual's fitness.
+    """
+    if len(individuals) == 0:
+        return
 
+    distances = [0.0] * len(individuals)
+    crowd = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
+
+    nobj = len(individuals[0].fitness.values)
+
+    for i in range(nobj):
+        crowd.sort(key=lambda element: element[0][i])
+        distances[crowd[0][1]] = float("inf")
+        distances[crowd[-1][1]] = float("inf")
+        if crowd[-1][0][i] == crowd[0][0][i]:
+            continue
+        norm = nobj * float(crowd[-1][0][i] - crowd[0][0][i])
+        for prev, cur, next in zip(crowd[:-2], crowd[1:-1], crowd[2:]):
+            distances[cur[1]] += (next[0][i] - prev[0][i]) / norm
+
+    for i, dist in enumerate(distances):
+        individuals[i].fitness.crowding_dist = dist
 def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
     the two individuals do not interdominate the selection is made
