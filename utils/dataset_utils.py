@@ -27,3 +27,24 @@ def get__counts(y,output=False):
     if output :
         print("每种类别的数量：", counts)
     return counts
+
+##########################由个体得到选择的实例子集的索引###########################
+def get_indices(individual):
+    '''
+    :param individual: individual（用二进制或0-1范围内的实值进行编码）
+    :return: 被选择实例的索引
+    '''
+    individual = np.round(individual)  # 数据范围在0-1之间，转化成int的同时会舍去小数部分，从而将个体映射到0-1编码
+    indices = np.where(individual == 1)  # 1代表选择该实例，返回值是tuple，tuple[0]取元组中的第一个元素
+    return indices[0]
+
+###########################获取实例子集############################
+def get_subset(individual,dataset_x,dataset_y):
+    '''
+    :param individual:
+    :return: 实例子集
+    '''
+    indices = get_indices(individual)
+    x_sub = dataset_x[indices, :]
+    y_sub = dataset_y[indices]
+    return x_sub, y_sub

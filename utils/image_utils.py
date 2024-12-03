@@ -30,3 +30,17 @@ def histogram(x,data,title,save_path):
         plt.text(a, b + 0.1, '%.0f' % b, ha='center', va='bottom', fontsize=12)
     plt.savefig(save_path,dpi=300, bbox_inches='tight')
     plt.close()
+
+
+# 绘制Pareto Front曲线
+def plot_front(fronts, gen, title):
+    """绘制当前代非支配排序的第一等级前沿"""
+    fitnesses = [ind.fitness.values for ind in fronts]
+    plt.scatter(*zip(*fitnesses), marker='o', label=f"Generation {gen}")
+    plt.title(title)
+    plt.xlabel("G-mean")
+    plt.ylabel("mAUC")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    plt.close()
