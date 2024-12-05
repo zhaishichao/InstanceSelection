@@ -1,4 +1,3 @@
-import random
 from array import array
 import scipy.io as sio  # 从.mat文件中读取数据集
 import numpy as np
@@ -17,7 +16,7 @@ from utils.dataset_utils import get__counts
 
 ################################################################加载数据集################################################
 # 数据集
-mat_data = sio.loadmat('../../data/dataset/Australian.mat')
+mat_data = sio.loadmat('../../../data/dataset/Australian.mat')
 # 提取变量
 dataset_x = mat_data['X']
 dataset_y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]

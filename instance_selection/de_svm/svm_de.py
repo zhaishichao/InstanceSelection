@@ -1,4 +1,3 @@
-import random
 from array import array
 import scipy.io as sio  # 从.mat文件中读取数据集
 import numpy as np
