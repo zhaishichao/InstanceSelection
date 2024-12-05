@@ -19,9 +19,9 @@ def mutate_binary_inversion(individual, mutation_rate=0.2):
     sampled_indices = random.sample(range(num_genes), num_mutation)  # 在num_genes个基因中随机采样num_mutation个
     for index in sampled_indices:
         if individual[index] == 0:
-            individual[index] == 1
+            individual[index] = 1
         else:
-            individual[index] == 0
+            individual[index] = 0
     return individual,
 
 

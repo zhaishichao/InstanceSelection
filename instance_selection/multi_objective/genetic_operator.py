@@ -8,6 +8,9 @@ import random
 import numpy
 import numpy as np
 
+######################################
+#         二项分布生成0-1序列           #
+######################################
 def exponential_distribution(lambda_, threshold):
     '''
     :param lambda_: 指数分布的参数λ（lambda）
@@ -66,9 +69,9 @@ def mutate_binary_inversion(individual, mutation_rate=0.2):
     sampled_indices = random.sample(range(num_genes), num_mutation)  # 在num_genes个基因中随机采样num_mutation个
     for index in sampled_indices:
         if individual[index] == 0:
-            individual[index] == 1
+            individual[index] = 1
         else:
-            individual[index] == 0
+            individual[index] = 0
     return individual,
 
 ######################################
