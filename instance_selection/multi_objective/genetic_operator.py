@@ -7,6 +7,22 @@ import random
 
 import numpy
 import numpy as np
+from sklearn.metrics import confusion_matrix
+
+######################################
+#     适应度函数（Acc1,Acc2,Acc3）      #
+######################################
+def fitness_function(individual, weights_train):
+    # 使用训练数据进行预测
+    y_sub, ind_pred = individual.y_sub_and_pred[0], individual.y_sub_and_pred[1]  # 获取个体的实例选择标签和预测标签
+    ######################计算混淆矩阵#########################
+    cm = confusion_matrix(y_sub, ind_pred)
+    tp_per_class = cm.diagonal()  # 对角线元素表示每个类预测正确的个数，对角线求和，即所有预测正确的实例个数之和，计算Acc1
+    s_per_class = cm.sum(axis=1)
+    Acc1 = np.sum(tp_per_class) / np.sum(s_per_class)  # Acc1
+    Acc2 = np.mean(tp_per_class.astype(float) / s_per_class.astype(float))  # Acc2
+    Acc3 = np.mean((tp_per_class.astype(float) / s_per_class.astype(float)) * weights_train)  # Acc3
+    return round(Acc1, 4), round(Acc2, 4), round(Acc3, 4)
 
 ######################################
 #         二项分布生成0-1序列           #
@@ -25,7 +41,9 @@ def exponential_distribution(lambda_, threshold):
     else:
         return 0
 
-# 在种群中找到重复的个体
+######################################
+#    查重（找到种群中互相重复的个体）      #
+######################################
 def find_duplicates(pop, similar=0.9):
     """
     找到重复个体的索引。
@@ -59,10 +77,10 @@ def find_duplicates(pop, similar=0.9):
                 duplicate = duplicate + (j,)
         duplicates.append(duplicate)
     return duplicates
+
 ######################################
 #      mutate(二进制随机反转)           #
 ######################################
-
 def mutate_binary_inversion(individual, mutation_rate=0.2):
     num_genes = len(individual)  # 基因总数
     num_mutation = math.ceil(random.uniform(0.15, mutation_rate) * num_genes)  # 要突变的总数
@@ -73,6 +91,7 @@ def mutate_binary_inversion(individual, mutation_rate=0.2):
         else:
             individual[index] = 0
     return individual,
+
 
 ######################################
 #               去重                  #
@@ -91,6 +110,7 @@ def remove_duplicates(pop, duplicates):
         to_remove.update(duplicate)  # update是用来更新set集合的
     # 构造去重后的列表
     return [pop[i] for i in range(len(pop)) if i not in to_remove], len(to_remove)
+
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
@@ -123,8 +143,8 @@ def selNSGA2(individuals, k, nd='standard', x_test=None, y_test=None):
         raise Exception('selNSGA2: The choice of non-dominated sorting '
                         'method "{0}" is invalid.'.format(nd))
 
-    #for front in pareto_fronts:
-        #assignCrowdingDist(front, x_test, y_test)
+    # for front in pareto_fronts:
+    # assignCrowdingDist(front, x_test, y_test)
     # assignCrowdingDist(individuals, x_test, y_test)
     assignCrowdingDist_PFC(individuals, x_test, y_test)
     chosen = list(chain(*pareto_fronts[:-1]))
@@ -201,6 +221,7 @@ def sortNondominated(individuals, k, first_front_only=False):
             next_front = []
     return fronts
 
+
 def assignCrowdingDist_PFC(individuals, x_test, y_test):
     """Assign a crowding distance to each individual's fitness. The
     crowding distance can be retrieve via the :attr:`crowding_dist`
@@ -208,16 +229,16 @@ def assignCrowdingDist_PFC(individuals, x_test, y_test):
     """
     if len(individuals) == 0:
         return
-    pred_lists = [] # 每个个体的预测结果， 0表示对应实例预测错误，1表示预测正确
+    pred_lists = []  # 每个个体的预测结果， 0表示对应实例预测错误，1表示预测正确
     for ind in individuals:
-        y_pred = ind.mlp.predict(x_test) # 模型预测结果
+        y_pred = ind.mlp.predict(x_test)  # 模型预测结果
         binary_list = [1 if x == y else 0 for x, y in zip(y_pred, y_test)]  # 0表示对应实例预测错误，1表示预测正确
         pred_lists.append(binary_list)
 
-    accfailcred = [[0 for _ in range(len(individuals))] for _ in range(len(individuals))] #
+    accfailcred = [[0 for _ in range(len(individuals))] for _ in range(len(individuals))]  #
     for i in range(len(individuals) - 1):
         count_zeros_i = sum(1 for x in pred_lists[i] if x == 0)
-        for j in range(i+1, len(individuals)):
+        for j in range(i + 1, len(individuals)):
             # 计算汉明距离
             hamming_distance = sum(x != y for x, y in zip(pred_lists[i], pred_lists[j]))
             count_zeros_j = sum(1 for x in pred_lists[j] if x == 0)
@@ -226,7 +247,8 @@ def assignCrowdingDist_PFC(individuals, x_test, y_test):
     # 对每一行求和
     row_sum_accfailcred = [sum(row) for row in accfailcred]
     for i in range(len(individuals)):
-        individuals[i].fitness.crowding_dist = 1.0 * row_sum_accfailcred[i] / (len(individuals)-1) # 使用PFC代替拥挤距离
+        individuals[i].fitness.crowding_dist = 1.0 * row_sum_accfailcred[i] / (len(individuals) - 1)  # 使用PFC代替拥挤距离
+
 
 def assignCrowdingDist(individuals):
     """Assign a crowding distance to each individual's fitness. The
@@ -253,6 +275,8 @@ def assignCrowdingDist(individuals):
 
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
+
+
 def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
     the two individuals do not interdominate the selection is made
@@ -563,414 +587,5 @@ def sweepB(best, worst, front):
             front[h] = max(front[h], front[fstair] + 1)
 
 
-######################################
-# Non-Dominated Sorting  (NSGA-III)  #
-######################################
-
-
-NSGA3Memory = namedtuple("NSGA3Memory", ["best_point", "worst_point", "extreme_points"])
-
-
-class selNSGA3WithMemory(object):
-    """Class version of NSGA-III selection including memory for best, worst and
-    extreme points. Registering this operator in a toolbox is a bit different
-    than classical operators, it requires to instantiate the class instead
-    of just registering the function::
-
-        >>> from deap import base
-        >>> ref_points = uniform_reference_points(nobj=3, p=12)
-        >>> toolbox = base.Toolbox()
-        >>> toolbox.register("select", selNSGA3WithMemory(ref_points))
-
-    """
-
-    def __init__(self, ref_points, nd="log"):
-        self.ref_points = ref_points
-        self.nd = nd
-        self.best_point = numpy.full((1, ref_points.shape[1]), numpy.inf)
-        self.worst_point = numpy.full((1, ref_points.shape[1]), -numpy.inf)
-        self.extreme_points = None
-
-    def __call__(self, individuals, k):
-        chosen, memory = selNSGA3(individuals, k, self.ref_points, self.nd,
-                                  self.best_point, self.worst_point,
-                                  self.extreme_points, True)
-        self.best_point = memory.best_point.reshape((1, -1))
-        self.worst_point = memory.worst_point.reshape((1, -1))
-        self.extreme_points = memory.extreme_points
-        return chosen
-
-
-def selNSGA3(individuals, k, ref_points, nd="log", best_point=None,
-             worst_point=None, extreme_points=None, return_memory=False):
-    """Implementation of NSGA-III selection as presented in [Deb2014]_.
-
-    This implementation is partly based on `lmarti/nsgaiii
-    <https://github.com/lmarti/nsgaiii>`_. It departs slightly from the
-    original implementation in that it does not use memory to keep track
-    of ideal and extreme points. This choice has been made to fit the
-    functional api of DEAP. For a version of NSGA-III see
-    :class:`~deap.tools.selNSGA3WithMemory`.
-
-    :param individuals: A list of individuals to select from.
-    :param k: The number of individuals to select.
-    :param ref_points: Reference points to use for niching.
-    :param nd: Specify the non-dominated algorithm to use: 'standard' or 'log'.
-    :param best_point: Best point found at previous generation. If not provided
-        find the best point only from current individuals.
-    :param worst_point: Worst point found at previous generation. If not provided
-        find the worst point only from current individuals.
-    :param extreme_points: Extreme points found at previous generation. If not provided
-        find the extreme points only from current individuals.
-    :param return_memory: If :data:`True`, return the best, worst and extreme points
-        in addition to the chosen individuals.
-    :returns: A list of selected individuals.
-    :returns: If `return_memory` is :data:`True`, a namedtuple with the
-        `best_point`, `worst_point`, and `extreme_points`.
-
-
-    You can generate the reference points using the :func:`uniform_reference_points`
-    function::
-
-        >>> ref_points = tools.uniform_reference_points(nobj=3, p=12)   # doctest: +SKIP
-        >>> selected = selNSGA3(population, k, ref_points)              # doctest: +SKIP
-
-    .. [Deb2014] Deb, K., & Jain, H. (2014). An Evolutionary Many-Objective Optimization
-        Algorithm Using Reference-Point-Based Nondominated Sorting Approach,
-        Part I: Solving Problems With Box Constraints. IEEE Transactions on
-        Evolutionary Computation, 18(4), 577-601. doi:10.1109/TEVC.2013.2281535.
-    """
-    if nd == "standard":
-        pareto_fronts = sortNondominated(individuals, k)
-    elif nd == "log":
-        pareto_fronts = sortLogNondominated(individuals, k)
-    else:
-        raise Exception("selNSGA3: The choice of non-dominated sorting "
-                        "method '{0}' is invalid.".format(nd))
-
-    # Extract fitnesses as a numpy array in the nd-sort order
-    # Use wvalues * -1 to tackle always as a minimization problem
-    fitnesses = numpy.array([ind.fitness.wvalues for f in pareto_fronts for ind in f])
-    fitnesses *= -1
-
-    # Get best and worst point of population, contrary to pymoo
-    # we don't use memory
-    if best_point is not None and worst_point is not None:
-        best_point = numpy.min(numpy.concatenate((fitnesses, best_point), axis=0), axis=0)
-        worst_point = numpy.max(numpy.concatenate((fitnesses, worst_point), axis=0), axis=0)
-    else:
-        best_point = numpy.min(fitnesses, axis=0)
-        worst_point = numpy.max(fitnesses, axis=0)
-
-    extreme_points = find_extreme_points(fitnesses, best_point, extreme_points)
-    front_worst = numpy.max(fitnesses[:sum(len(f) for f in pareto_fronts), :], axis=0)
-    intercepts = find_intercepts(extreme_points, best_point, worst_point, front_worst)
-    niches, dist = associate_to_niche(fitnesses, ref_points, best_point, intercepts)
-
-    # Get counts per niche for individuals in all front but the last
-    niche_counts = numpy.zeros(len(ref_points), dtype=numpy.int64)
-    index, counts = numpy.unique(niches[:-len(pareto_fronts[-1])], return_counts=True)
-    niche_counts[index] = counts
-
-    # Choose individuals from all fronts but the last
-    chosen = list(chain(*pareto_fronts[:-1]))
-
-    # Use niching to select the remaining individuals
-    sel_count = len(chosen)
-    n = k - sel_count
-    selected = niching(pareto_fronts[-1], n, niches[sel_count:], dist[sel_count:], niche_counts)
-    chosen.extend(selected)
-
-    if return_memory:
-        return chosen, NSGA3Memory(best_point, worst_point, extreme_points)
-    return chosen
-
-
-def find_extreme_points(fitnesses, best_point, extreme_points=None):
-    'Finds the individuals with extreme values for each objective function.'
-    # Keep track of last generation extreme points
-    if extreme_points is not None:
-        fitnesses = numpy.concatenate((fitnesses, extreme_points), axis=0)
-
-    # Translate objectives
-    ft = fitnesses - best_point
-
-    # Find achievement scalarizing function (asf)
-    asf = numpy.eye(best_point.shape[0])
-    asf[asf == 0] = 1e6
-    asf = numpy.max(ft * asf[:, numpy.newaxis, :], axis=2)
-
-    # Extreme point are the fitnesses with minimal asf
-    min_asf_idx = numpy.argmin(asf, axis=1)
-    return fitnesses[min_asf_idx, :]
-
-
-def find_intercepts(extreme_points, best_point, current_worst, front_worst):
-    """Find intercepts between the hyperplane and each axis with
-    the ideal point as origin."""
-    # Construct hyperplane sum(f_i^n) = 1
-    b = numpy.ones(extreme_points.shape[1])
-    A = extreme_points - best_point
-    try:
-        x = numpy.linalg.solve(A, b)
-    except numpy.linalg.LinAlgError:
-        intercepts = current_worst
-    else:
-        if numpy.count_nonzero(x) != len(x):
-            intercepts = front_worst
-        else:
-            intercepts = 1 / x
-
-            if (not numpy.allclose(numpy.dot(A, x), b) or
-                    numpy.any(intercepts <= 1e-6) or
-                    numpy.any((intercepts + best_point) > current_worst)):
-                intercepts = front_worst
-
-    return intercepts
-
-
-def associate_to_niche(fitnesses, reference_points, best_point, intercepts):
-    """Associates individuals to reference points and calculates niche number.
-    Corresponds to Algorithm 3 of Deb & Jain (2014)."""
-    # Normalize by ideal point and intercepts
-    fn = (fitnesses - best_point) / (intercepts - best_point + numpy.finfo(float).eps)
-
-    # Create distance matrix
-    fn = numpy.repeat(numpy.expand_dims(fn, axis=1), len(reference_points), axis=1)
-    norm = numpy.linalg.norm(reference_points, axis=1)
-
-    distances = numpy.sum(fn * reference_points, axis=2) / norm.reshape(1, -1)
-    distances = distances[:, :, numpy.newaxis] * reference_points[numpy.newaxis, :, :] / norm[numpy.newaxis, :,
-                                                                                         numpy.newaxis]
-    distances = numpy.linalg.norm(distances - fn, axis=2)
-
-    # Retrieve min distance niche index
-    niches = numpy.argmin(distances, axis=1)
-    distances = distances[list(range(niches.shape[0])), niches]
-    return niches, distances
-
-
-def niching(individuals, k, niches, distances, niche_counts):
-    selected = []
-    available = numpy.ones(len(individuals), dtype=bool)
-    while len(selected) < k:
-        # Maximum number of individuals (niches) to select in that round
-        n = k - len(selected)
-
-        # Find the available niches and the minimum niche count in them
-        available_niches = numpy.zeros(len(niche_counts), dtype=bool)
-        available_niches[numpy.unique(niches[available])] = True
-        min_count = numpy.min(niche_counts[available_niches])
-
-        # Select at most n niches with the minimum count
-        selected_niches = numpy.flatnonzero(numpy.logical_and(available_niches, niche_counts == min_count))
-        numpy.random.shuffle(selected_niches)
-        selected_niches = selected_niches[:n]
-
-        for niche in selected_niches:
-            # Select from available individuals in niche
-            niche_individuals = numpy.flatnonzero(numpy.logical_and(niches == niche, available))
-            numpy.random.shuffle(niche_individuals)
-
-            # If no individual in that niche, select the closest to reference
-            # Else select randomly
-            if niche_counts[niche] == 0:
-                sel_index = niche_individuals[numpy.argmin(distances[niche_individuals])]
-            else:
-                sel_index = niche_individuals[0]
-
-            # Update availability, counts and selection
-            available[sel_index] = False
-            niche_counts[niche] += 1
-            selected.append(individuals[sel_index])
-
-    return selected
-
-
-def uniform_reference_points(nobj, p=4, scaling=None):
-    """Generate reference points uniformly on the hyperplane intersecting
-    each axis at 1. The scaling factor is used to combine multiple layers of
-    reference points.
-    """
-
-    def gen_refs_recursive(ref, nobj, left, total, depth):
-        points = []
-        if depth == nobj - 1:
-            ref[depth] = left / total
-            points.append(ref)
-        else:
-            for i in range(left + 1):
-                ref[depth] = i / total
-                points.extend(gen_refs_recursive(ref.copy(), nobj, left - i, total, depth + 1))
-        return points
-
-    ref_points = numpy.array(gen_refs_recursive(numpy.zeros(nobj), nobj, p, p, 0))
-    if scaling is not None:
-        ref_points *= scaling
-        ref_points += (1 - scaling) / nobj
-
-    return ref_points
-
-
-######################################
-# Strength Pareto         (SPEA-II)  #
-######################################
-
-def selSPEA2(individuals, k):
-    """Apply SPEA-II selection operator on the *individuals*. Usually, the
-    size of *individuals* will be larger than *n* because any individual
-    present in *individuals* will appear in the returned list at most once.
-    Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a strength Pareto scheme. The
-    list returned contains references to the input *individuals*. For more
-    details on the SPEA-II operator see [Zitzler2001]_.
-
-    :param individuals: A list of individuals to select from.
-    :param k: The number of individuals to select.
-    :returns: A list of selected individuals.
-
-    .. [Zitzler2001] Zitzler, Laumanns and Thiele, "SPEA 2: Improving the
-       strength Pareto evolutionary algorithm", 2001.
-    """
-    N = len(individuals)
-    L = len(individuals[0].fitness.values)
-    K = math.sqrt(N)
-    strength_fits = [0] * N
-    fits = [0] * N
-    dominating_inds = [list() for i in range(N)]
-
-    for i, ind_i in enumerate(individuals):
-        for j, ind_j in enumerate(individuals[i + 1:], i + 1):
-            if ind_i.fitness.dominates(ind_j.fitness):
-                strength_fits[i] += 1
-                dominating_inds[j].append(i)
-            elif ind_j.fitness.dominates(ind_i.fitness):
-                strength_fits[j] += 1
-                dominating_inds[i].append(j)
-
-    for i in range(N):
-        for j in dominating_inds[i]:
-            fits[i] += strength_fits[j]
-
-    # Choose all non-dominated individuals
-    chosen_indices = [i for i in range(N) if fits[i] < 1]
-
-    if len(chosen_indices) < k:  # The archive is too small
-        for i in range(N):
-            distances = [0.0] * N
-            for j in range(i + 1, N):
-                dist = 0.0
-                for k in range(L):
-                    val = individuals[i].fitness.values[k] - \
-                          individuals[j].fitness.values[k]
-                    dist += val * val
-                distances[j] = dist
-            kth_dist = _randomizedSelect(distances, 0, N - 1, K)
-            density = 1.0 / (kth_dist + 2.0)
-            fits[i] += density
-
-        next_indices = [(fits[i], i) for i in range(N)
-                        if i not in chosen_indices]
-        next_indices.sort()
-        # print next_indices
-        chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
-
-    elif len(chosen_indices) > k:  # The archive is too large
-        N = len(chosen_indices)
-        distances = [[0.0] * N for i in range(N)]
-        sorted_indices = [[0] * N for i in range(N)]
-        for i in range(N):
-            for j in range(i + 1, N):
-                dist = 0.0
-                for k in range(L):
-                    val = individuals[chosen_indices[i]].fitness.values[k] - \
-                          individuals[chosen_indices[j]].fitness.values[k]
-                    dist += val * val
-                distances[i][j] = dist
-                distances[j][i] = dist
-            distances[i][i] = -1
-
-        # Insert sort is faster than quick sort for short arrays
-        for i in range(N):
-            for j in range(1, N):
-                k = j
-                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
-                    sorted_indices[i][k] = sorted_indices[i][k - 1]
-                    k -= 1
-                sorted_indices[i][k] = j
-
-        size = N
-        to_remove = []
-        while size > k:
-            # Search for minimal distance
-            min_pos = 0
-            for i in range(1, N):
-                for j in range(1, size):
-                    dist_i_sorted_j = distances[i][sorted_indices[i][j]]
-                    dist_min_sorted_j = distances[min_pos][sorted_indices[min_pos][j]]
-
-                    if dist_i_sorted_j < dist_min_sorted_j:
-                        min_pos = i
-                        break
-                    elif dist_i_sorted_j > dist_min_sorted_j:
-                        break
-
-            # Remove minimal distance from sorted_indices
-            for i in range(N):
-                distances[i][min_pos] = float("inf")
-                distances[min_pos][i] = float("inf")
-
-                for j in range(1, size - 1):
-                    if sorted_indices[i][j] == min_pos:
-                        sorted_indices[i][j] = sorted_indices[i][j + 1]
-                        sorted_indices[i][j + 1] = min_pos
-
-            # Remove corresponding individual from chosen_indices
-            to_remove.append(min_pos)
-            size -= 1
-
-        for index in reversed(sorted(to_remove)):
-            del chosen_indices[index]
-
-    return [individuals[i] for i in chosen_indices]
-
-
-def _randomizedSelect(array, begin, end, i):
-    """Allows to select the ith smallest element from array without sorting it.
-    Runtime is expected to be O(n).
-    """
-    if begin == end:
-        return array[begin]
-    q = _randomizedPartition(array, begin, end)
-    k = q - begin + 1
-    if i < k:
-        return _randomizedSelect(array, begin, q, i)
-    else:
-        return _randomizedSelect(array, q + 1, end, i - k)
-
-
-def _randomizedPartition(array, begin, end):
-    i = random.randint(begin, end)
-    array[begin], array[i] = array[i], array[begin]
-    return _partition(array, begin, end)
-
-
-def _partition(array, begin, end):
-    x = array[begin]
-    i = begin - 1
-    j = end + 1
-    while True:
-        j -= 1
-        while array[j] > x:
-            j -= 1
-        i += 1
-        while array[i] < x:
-            i += 1
-        if i < j:
-            array[i], array[j] = array[j], array[i]
-        else:
-            return j
-
-
-__all__ = ['selNSGA2', 'selNSGA3', 'selNSGA3WithMemory', 'selSPEA2', 'sortNondominated', 'sortLogNondominated',
-           'selTournamentDCD', 'uniform_reference_points']
+__all__ = ['selNSGA2', 'sortNondominated', 'sortLogNondominated',
+           'selTournamentDCD']
