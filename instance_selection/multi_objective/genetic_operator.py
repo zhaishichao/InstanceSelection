@@ -5,7 +5,6 @@ import math
 from operator import attrgetter, itemgetter
 import random
 
-import numpy
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
