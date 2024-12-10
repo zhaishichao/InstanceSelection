@@ -6,7 +6,33 @@ from operator import attrgetter, itemgetter
 import random
 
 import numpy as np
+from numpy import hamming
 from sklearn.metrics import confusion_matrix
+
+
+
+######################################
+#     添加约束条件，去除种群中的不可行解    #
+######################################
+# Judge the type of solution.
+def CV(individual, Acc1, Acc2, Acc3):
+    acc = (Acc1 - individual.fitness.values[0], Acc2 - individual.fitness.values[1], Acc3 - individual.fitness.values[2])
+    cv = 0
+    for i in range(len(acc)):
+        # 求0和cv中的最大值之和
+        cv = cv + max(0, acc[i])
+    return cv
+# remove infeasible solution
+# 对非可行解做一个排序，按照cv值的大小，越大越好？？？（未完成）
+def remove_infeasible(pop,Acc1, Acc2, Acc3):
+    index=[]
+    for i in range(len(pop)):
+        if CV(pop[i], Acc1, Acc2, Acc3) > 0:
+            index.append(i)
+    # 去除pop中对应index索引中对应的个体，得到新pop
+    feasible_pop = [ind for j, ind in enumerate(pop) if j not in index]
+    infeasible_pop = [ind for j, ind in enumerate(pop) if j in index]
+    return feasible_pop, len(index), infeasible_pop
 
 ######################################
 #     适应度函数（Acc1,Acc2,Acc3）      #
@@ -22,6 +48,7 @@ def fitness_function(individual, weights_train):
     Acc2 = np.mean(tp_per_class.astype(float) / s_per_class.astype(float))  # Acc2
     Acc3 = np.mean((tp_per_class.astype(float) / s_per_class.astype(float)) * weights_train)  # Acc3
     return round(Acc1, 4), round(Acc2, 4), round(Acc3, 4)
+
 
 ######################################
 #         二项分布生成0-1序列           #
@@ -40,10 +67,12 @@ def exponential_distribution(lambda_, threshold):
     else:
         return 0
 
+
 ######################################
 #    查重（找到种群中互相重复的个体）      #
 ######################################
-def find_duplicates(pop, similar=0.9):
+# 删除重复个体（相似度=similar）
+def find_duplicates_based_on_similarity(pop, similar=0.9):
     """
     找到重复个体的索引。
     :param arrays: 一个包含 array.array 的列表
@@ -77,12 +106,35 @@ def find_duplicates(pop, similar=0.9):
         duplicates.append(duplicate)
     return duplicates
 
+
+# 删除重复个体（完全一样）
+def find_duplicates(pop):
+    """
+    找到重复个体的索引。
+    :param arrays: 一个包含 array.array 的列表
+    :param threshold: 重复的判断阈值
+    :return: 重复对的索引列表
+    """
+    n = len(pop)
+    duplicates = []  # 用于记录重复对的索引
+
+    for i in range(n):
+        duplicate = ()
+        for j in range(i + 1, n):
+            # 计算pop[i],pop[j]之间的汉明距离
+            hamming_distance = sum(x != y for x, y in zip(pop[i], pop[j]))
+            if hamming_distance == 0:
+                duplicate = duplicate + (j,)
+        duplicates.append(duplicate)
+    return duplicates
+
+
 ######################################
 #      mutate(二进制随机反转)           #
 ######################################
 def mutate_binary_inversion(individual, mutation_rate=0.2):
     num_genes = len(individual)  # 基因总数
-    num_mutation = math.ceil(random.uniform(0.01, mutation_rate) * num_genes)  # 要突变的总数
+    num_mutation = math.ceil(random.uniform(0.05, mutation_rate) * num_genes)  # 要突变的总数
     sampled_indices = random.sample(range(num_genes), num_mutation)  # 在num_genes个基因中随机采样num_mutation个
     for index in sampled_indices:
         if individual[index] == 0:
