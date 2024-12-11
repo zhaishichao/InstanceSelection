@@ -1,14 +1,12 @@
 import bisect
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from itertools import chain
 import math
 from operator import attrgetter, itemgetter
 import random
 
 import numpy as np
-from numpy import hamming
 from sklearn.metrics import confusion_matrix
-
 
 
 ######################################
@@ -16,23 +14,27 @@ from sklearn.metrics import confusion_matrix
 ######################################
 # Judge the type of solution.
 def CV(individual, Acc1, Acc2, Acc3):
-    acc = (Acc1 - individual.fitness.values[0], Acc2 - individual.fitness.values[1], Acc3 - individual.fitness.values[2])
+    acc = (
+        Acc1 - individual.fitness.values[0], Acc2 - individual.fitness.values[1], Acc3 - individual.fitness.values[2])
     cv = 0
     for i in range(len(acc)):
         # 求0和cv中的最大值之和
         cv = cv + max(0, acc[i])
     return cv
+
+
 # remove infeasible solution
 # 对非可行解做一个排序，按照cv值的大小，越大越好？？？（未完成）
-def remove_infeasible(pop,Acc1, Acc2, Acc3):
-    index=[]
+def get_feasible_infeasible(pop, Acc1, Acc2, Acc3):
+    index = []
     for i in range(len(pop)):
         if CV(pop[i], Acc1, Acc2, Acc3) > 0:
             index.append(i)
-    # 去除pop中对应index索引中对应的个体，得到新pop
+    # 获取可行解与不可行解
     feasible_pop = [ind for j, ind in enumerate(pop) if j not in index]
     infeasible_pop = [ind for j, ind in enumerate(pop) if j in index]
-    return feasible_pop, len(index), infeasible_pop
+    return feasible_pop, infeasible_pop
+
 
 ######################################
 #     适应度函数（Acc1,Acc2,Acc3）      #
@@ -163,6 +165,41 @@ def remove_duplicates(pop, duplicates):
     return [pop[i] for i in range(len(pop)) if i not in to_remove], len(to_remove)
 
 
+######################################
+#        锦标赛选择，基于非支配排序       #
+######################################
+def selRandom(individuals, k):
+    """Select *k* individuals at random from the input *individuals* with
+    replacement. The list returned contains references to the input
+    *individuals*.
+
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+
+    This function uses the :func:`~random.choice` function from the
+    python base :mod:`random` module.
+    """
+    return [random.choice(individuals) for i in range(k)]
+def selTournament(individuals, k, tournsize, fit_attr="fitness"):
+    """Select the best individual among *tournsize* randomly chosen
+    individuals, *k* times. The list returned contains
+    references to the input *individuals*.
+
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param tournsize: The number of individuals participating in each tournament.
+    :param fit_attr: The attribute of individuals to use as selection criterion
+    :returns: A list of selected individuals.
+
+    This function uses the :func:`~random.choice` function from the python base
+    :mod:`random` module.
+    """
+    chosen = []
+    for i in range(k):
+        aspirants = selRandom(individuals, tournsize)
+        chosen.append(max(aspirants, key=attrgetter(fit_attr)))
+    return chosen
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
