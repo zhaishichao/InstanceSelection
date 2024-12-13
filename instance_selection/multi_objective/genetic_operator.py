@@ -10,9 +10,9 @@ from sklearn.metrics import confusion_matrix
 
 
 ######################################
-#     添加约束条件，去除种群中的不可行解    #
+# 添加约束条件，得到种群中的不可行解和可行解 #
 ######################################
-# Judge the type of solution.
+# 计算cv值
 def CV(individual, Acc1, Acc2, Acc3):
     acc = (
         Acc1 - individual.fitness.values[0], Acc2 - individual.fitness.values[1], Acc3 - individual.fitness.values[2])
@@ -20,19 +20,19 @@ def CV(individual, Acc1, Acc2, Acc3):
     for i in range(len(acc)):
         # 求0和cv中的最大值之和
         cv = cv + max(0, acc[i])
+        individual.fitness.cv = cv  # 将cv值保存在个体中
     return cv
 
-
-# remove infeasible solution
-# 对非可行解做一个排序，按照cv值的大小，越大越好？？？（未完成）
+# 获得可行解与不可行解
 def get_feasible_infeasible(pop, Acc1, Acc2, Acc3):
     index = []
     for i in range(len(pop)):
         if CV(pop[i], Acc1, Acc2, Acc3) > 0:
             index.append(i)
     # 获取可行解与不可行解
-    feasible_pop = [ind for j, ind in enumerate(pop) if j not in index]
-    infeasible_pop = [ind for j, ind in enumerate(pop) if j in index]
+    feasible_pop = [ind for j, ind in enumerate(pop) if j not in index] # 得到可行解
+    infeasible_pop = [ind for j, ind in enumerate(pop) if j in index] # 得到不可行解
+    infeasible_pop = sorted(infeasible_pop, key=attrgetter("fitness.cv"))  # 对种群中的不可行解按照个体的cv值升序排序
     return feasible_pop, infeasible_pop
 
 
@@ -71,9 +71,24 @@ def exponential_distribution(lambda_, threshold):
 
 
 ######################################
+#      mutate(二进制随机反转)           #
+######################################
+def mutate_binary_inversion(individual, mutation_rate=0.2):
+    num_genes = len(individual)  # 基因总数
+    num_mutation = math.ceil(random.uniform(0.05, mutation_rate) * num_genes)  # 要突变的总数
+    sampled_indices = random.sample(range(num_genes), num_mutation)  # 在num_genes个基因中随机采样num_mutation个
+    for index in sampled_indices:
+        if individual[index] == 0:
+            individual[index] = 1
+        else:
+            individual[index] = 0
+    return individual,
+
+
+######################################
 #    查重（找到种群中互相重复的个体）      #
 ######################################
-# 删除重复个体（相似度=similar）
+# 得到重复个体（基于similar）
 def find_duplicates_based_on_similarity(pop, similar=0.9):
     """
     找到重复个体的索引。
@@ -109,7 +124,7 @@ def find_duplicates_based_on_similarity(pop, similar=0.9):
     return duplicates
 
 
-# 删除重复个体（完全一样）
+# 得到重复个体（完全一样）
 def find_duplicates(pop):
     """
     找到重复个体的索引。
@@ -132,21 +147,6 @@ def find_duplicates(pop):
 
 
 ######################################
-#      mutate(二进制随机反转)           #
-######################################
-def mutate_binary_inversion(individual, mutation_rate=0.2):
-    num_genes = len(individual)  # 基因总数
-    num_mutation = math.ceil(random.uniform(0.05, mutation_rate) * num_genes)  # 要突变的总数
-    sampled_indices = random.sample(range(num_genes), num_mutation)  # 在num_genes个基因中随机采样num_mutation个
-    for index in sampled_indices:
-        if individual[index] == 0:
-            individual[index] = 1
-        else:
-            individual[index] = 0
-    return individual,
-
-
-######################################
 #               去重                  #
 ######################################
 # 根据索引对，去除种群中重复的个体
@@ -166,7 +166,7 @@ def remove_duplicates(pop, duplicates):
 
 
 ######################################
-#        锦标赛选择，基于非支配排序       #
+#    锦标赛选择，基于非支配排序和拥挤距离   #
 ######################################
 def selRandom(individuals, k):
     """Select *k* individuals at random from the input *individuals* with
@@ -181,7 +181,9 @@ def selRandom(individuals, k):
     python base :mod:`random` module.
     """
     return [random.choice(individuals) for i in range(k)]
-def selTournament(individuals, k, tournsize, fit_attr="fitness"):
+
+
+def selTournamentNDCD(individuals, k, tournsize):
     """Select the best individual among *tournsize* randomly chosen
     individuals, *k* times. The list returned contains
     references to the input *individuals*.
@@ -195,15 +197,19 @@ def selTournament(individuals, k, tournsize, fit_attr="fitness"):
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
     """
+    # 先做非支配排序，再根据选择支配等级进行选择
     chosen = []
     for i in range(k):
-        aspirants = selRandom(individuals, tournsize)
-        chosen.append(max(aspirants, key=attrgetter(fit_attr)))
+        aspirants = selRandom(individuals, tournsize)  # 随机选择tournsize个个体
+        aspirants = sortNondominated(aspirants, len(aspirants))  # 进行非支配排序
+        aspirants_rank_first = sorted(aspirants[0], key=attrgetter("fitness.crowding_dist"), reverse=True)  # 在第一个等级内按cv升序排列
+        chosen.append(aspirants_rank_first[0])  # 选择第一个等级中cv约束最小的
     return chosen
+
+
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
-
 
 def selNSGA2(individuals, k, nd='standard', x_test=None, y_test=None):
     """Apply NSGA-II selection operator on the *individuals*. Usually, the
