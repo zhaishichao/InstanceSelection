@@ -1,7 +1,12 @@
 import numpy as np
 
 
+# 得到
+
 # 得到分类、以及分类所对应的索引
+# 也可使用numpy
+# 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
+# unique_elements, counts, indices = np.unique(labels, return_counts=True, return_inverse=True)
 def get_classes_indexes_counts(y, output=False):
     # 统计每个类别的个数，y.max()+1是类别的个数
     num_class = y.max() + 1
@@ -17,8 +22,25 @@ def get_classes_indexes_counts(y, output=False):
     return classes, counts
 
 
-# 得到分类、以及分类所对应的数量
-def get__counts(y, output=False):
+# 得到分类、以及分类所对应的数量，初始化个体为平衡数据集
+def init_population_for_balanced_dataset(population, y, ratio):
+    # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
+    unique_elements, counts = np.unique(y, return_counts=True)
+
+    num_instances = int(np.ceil(counts.min() * ratio))
+    # 构造每个类别的索引列表
+    class_indices = {element: np.where(y == element)[0] for element in unique_elements}
+
+    for i in range(len(population)):
+        # 对于每个类，随机选择 num_instances 个不同的索引，生成一个新的dict
+        select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
+                                class_indices.items()}
+        for element in unique_elements:
+            for index in select_class_indices[element]:
+                population[i][index]=1
+    return population
+
+def get_counts(y, output=False):
     # 统计每个类别的个数，y.max()+1是类别的个数
     num_class = y.max() + 1
     counts = np.zeros(num_class, dtype=int)
@@ -72,9 +94,6 @@ def balanced_dataset(x_train, y_train, num_instances):
     return balanced_dataset_x, balanced_dataset_y
 
 
-
-
-
 # 引用自
 # [E. R. Q. Fernandes, A. C. P. L. F. de Carvalho and X. Yao
 # “Ensemble of Classifiers Based on Multiobjective Genetic Sampling for Imbalanced Data,”
@@ -95,14 +114,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 
-
 def datasetload(datasetname):
     # 随机种子
     random_seed = 42
     print("#########################加载数据集#########################")
     # 数据集
     # Nursery(0.1)、Satellite(0.001)、Contraceptive(0.1)
-    #datasetname = 'Chess4.mat'
+    # datasetname = 'Chess4.mat'
     mat_data = sio.loadmat('../../data/dataset/' + datasetname)
 
     dataset_x = mat_data['X']
@@ -148,24 +166,3 @@ def datasetload(datasetname):
     # 统计每个类别的分布
     classes_balanced_dataset, counts_balanced_dataset = get_classes_indexes_counts(balanced_dataset_y)
     print("平衡的数据集中每种类别的分布：", counts_balanced_dataset)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -69,6 +69,20 @@ def exponential_distribution(lambda_, threshold):
     else:
         return 0
 
+# 全部初始化为0
+def init_by_one_or_zero(binary=0):
+    '''
+
+    :param binary: 0或1
+    :return: binary
+    '''
+
+    return binary
+
+# 平衡数据集
+def init_individuals_for_balanced_data(individuals, y_train):
+
+    return individuals
 
 ######################################
 #      mutate(二进制随机反转)           #
