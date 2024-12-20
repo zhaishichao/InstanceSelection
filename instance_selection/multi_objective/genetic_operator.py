@@ -23,6 +23,7 @@ def CV(individual, Acc1, Acc2, Acc3):
         individual.fitness.cv = cv  # 将cv值保存在个体中
     return cv
 
+
 # 获得可行解与不可行解
 def get_feasible_infeasible(pop, Acc1, Acc2, Acc3):
     index = []
@@ -30,8 +31,8 @@ def get_feasible_infeasible(pop, Acc1, Acc2, Acc3):
         if CV(pop[i], Acc1, Acc2, Acc3) > 0:
             index.append(i)
     # 获取可行解与不可行解
-    feasible_pop = [ind for j, ind in enumerate(pop) if j not in index] # 得到可行解
-    infeasible_pop = [ind for j, ind in enumerate(pop) if j in index] # 得到不可行解
+    feasible_pop = [ind for j, ind in enumerate(pop) if j not in index]  # 得到可行解
+    infeasible_pop = [ind for j, ind in enumerate(pop) if j in index]  # 得到不可行解
     infeasible_pop = sorted(infeasible_pop, key=attrgetter("fitness.cv"))  # 对种群中的不可行解按照个体的cv值升序排序
     return feasible_pop, infeasible_pop
 
@@ -69,20 +70,38 @@ def exponential_distribution(lambda_, threshold):
     else:
         return 0
 
+
 # 全部初始化为0
 def init_by_one_or_zero(binary=0):
     '''
-
     :param binary: 0或1
     :return: binary
     '''
-
     return binary
 
-# 平衡数据集
-def init_individuals_for_balanced_data(individuals, y_train):
 
-    return individuals
+# 平衡数据集(只在初始化个体时使用)
+# 得到分类、以及分类所对应的数量，初始化个体为平衡数据集
+def init_population_for_balanced_dataset(population, y_train, ratio, show_details=False):
+    # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
+    unique_elements, counts = np.unique(y_train, return_counts=True)
+    num_instances = int(np.ceil(counts.min() * ratio))
+    # 构造每个类别的索引列表
+    class_indices = {element: np.where(y_train == element)[0] for element in unique_elements}
+    if show_details:
+        # 输出类别和类别对应的数量
+        # 遍历class_indices,输出每个类，以及每个类的数量，以及索引
+        for element in unique_elements:
+            print(f"类别: {element}, 个数: {len(class_indices[element])}")
+    for i in range(len(population)):
+        # 对于每个类，随机选择 num_instances 个不同的索引，生成一个新的dict
+        select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
+                                class_indices.items()}
+        for element in unique_elements:
+            for index in select_class_indices[element]:
+                population[i][index] = 1
+    return population
+
 
 ######################################
 #      mutate(二进制随机反转)           #
@@ -216,7 +235,8 @@ def selTournamentNDCD(individuals, k, tournsize):
     for i in range(k):
         aspirants = selRandom(individuals, tournsize)  # 随机选择tournsize个个体
         aspirants = sortNondominated(aspirants, len(aspirants))  # 进行非支配排序
-        aspirants_rank_first = sorted(aspirants[0], key=attrgetter("fitness.crowding_dist"), reverse=True)  # 在第一个等级内按cv升序排列
+        aspirants_rank_first = sorted(aspirants[0], key=attrgetter("fitness.crowding_dist"),
+                                      reverse=True)  # 在第一个等级内按cv升序排列
         chosen.append(aspirants_rank_first[0])  # 选择第一个等级中cv约束最小的
     return chosen
 
