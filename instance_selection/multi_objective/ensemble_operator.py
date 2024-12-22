@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import gmean, mode
 from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score, classification_report
 
+
 def vote_ensembles(ensembles, x_test, y_test, show_result=False):
     y_pred_labels_ensembles = []
     y_pred_prob_labels_ensembles = []
@@ -18,7 +19,7 @@ def vote_ensembles(ensembles, x_test, y_test, show_result=False):
     # 对第一个维度 (num_classifiers) 求平均
     ensemble_predictions_prob = np.mean(stacked_predictions_prob, axis=0)
     # 计算 ROC AUC（ovo+macro）、G-Mean、recall_per_class
-    auc_ovo_macro, geometric_mean, recall_per_class = calculate_gmean_mauc(ensemble_predictions_prob, y_test)
+    geometric_mean, auc_ovo_macro, recall_per_class = calculate_gmean_mauc(ensemble_predictions_prob, y_test)
     # 计算准确率
     accuracy = accuracy_score(y_test, final_pred_result)
     if show_result:
@@ -44,3 +45,16 @@ def calculate_gmean_mauc(y_pred_proba, y):
     # 计算G-Mean
     geometric_mean = gmean(recall_per_class)
     return round(geometric_mean, 4), round(auc_ovo_macro, 4), recall_per_class
+
+
+def ensembles_individuals_gmean_mauc(individuals):
+    num_ensembles = len(individuals)
+    sum_gmean = 0
+    sum_mauc = 0
+    for ind in individuals:
+        sum_mauc = sum_mauc + ind.mauc
+        sum_gmean = sum_gmean + ind.gmean
+    # 求平均值
+    avg_gmean = sum_gmean / num_ensembles
+    avg_mauc = sum_mauc / num_ensembles
+    return round(avg_gmean, 4), round(avg_mauc, 4)

@@ -57,10 +57,11 @@ def selTournamentNDCD(individuals, k, tournsize):
     chosen = []
     for i in range(k):
         aspirants = selRandom(individuals, tournsize)  # 随机选择tournsize个个体
-        aspirants = sortNondominated(aspirants, len(aspirants))  # 进行非支配排序
-        aspirants_rank_first = sorted(aspirants[0], key=attrgetter("fitness.crowding_dist"),
-                                      reverse=True)  # 在第一个等级内按cv升序排列
-        chosen.append(aspirants_rank_first[0])  # 选择第一个等级中cv约束最小的
+        pareto_fronts = sortNondominated(aspirants, len(aspirants))  # 进行非支配排序
+        assignCrowdingDist(pareto_fronts[0])
+        pareto_first_front = sorted(pareto_fronts[0], key=attrgetter("fitness.crowding_dist"),
+                                      reverse=True)  # 按拥挤度降序排列
+        chosen.append(pareto_first_front[0])  # 选择第一个等级中拥挤度最大的
     return chosen
 
 

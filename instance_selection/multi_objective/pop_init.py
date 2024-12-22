@@ -46,6 +46,7 @@ def init_population_for_balanced_dataset(population, y_train, ratio, show_detail
             print(f"类别: {element}, 个数: {len(class_indices[element])}")
     for i in range(len(population)):
         # 对于每个类，随机选择 num_instances 个不同的索引，生成一个新的dict
+        # 在num_instances和
         select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
                                 class_indices.items()}
         for element in unique_elements:
