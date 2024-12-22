@@ -1,11 +1,10 @@
-
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from sklearn.base import clone
 import numpy as np
 
 
-def k_fold_cross_validation_with_soft_labels(model, X, y, n_splits=5):
+def k_fold_cross_validation(model, X, y, n_splits=5, method='soft',random_state=42):
     """
     Perform 5-fold cross-validation and generate soft labels (probability predictions).
 
@@ -13,14 +12,16 @@ def k_fold_cross_validation_with_soft_labels(model, X, y, n_splits=5):
     - model: A sklearn-compatible model with a `predict_proba` method.
     - X: Feature matrix (numpy array or pandas DataFrame).
     - y: Target vector (numpy array or pandas Series).
+    - n_splits:k-fold cross validation
+    - method: 'soft' or 'hard'
 
     Returns:
     - soft_labels: A numpy array containing the soft labels for each sample.
     - scores: A list of accuracy scores for each fold.
     """
-    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)  # 5-fold cross-validation
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)  # 5-fold cross-validation
     soft_labels = np.zeros((len(y), len(np.unique(y))))  # Initialize array for soft labels
-    scores = []
+    # scores = []
     for train_index, test_index in kf.split(X):
         # Split data into train and test
         X_train, X_test = X[train_index], X[test_index]
@@ -31,13 +32,19 @@ def k_fold_cross_validation_with_soft_labels(model, X, y, n_splits=5):
         # Generate soft labels (probability predictions)
         y_proba = model_clone.predict_proba(X_test)
         soft_labels[test_index] = y_proba
-
         # Evaluate the model
-        y_pred = np.argmax(y_proba, axis=1)  # Convert probabilities to class predictions
-        score = accuracy_score(y_test, y_pred)
-        scores.append(score)
+        # y_pred = np.argmax(y_proba, axis=1)  # Convert probabilities to class predictions
+        # score = accuracy_score(y_test, y_pred)
+        # scores.append(score)
+    if method == 'soft':
+        return soft_labels
+    elif method == 'hard':
+        hard_labels = np.argmax(y_proba, axis=1)
+        return hard_labels
+    else:
+        return soft_labels
 
-    return soft_labels, scores
+
 # 得到分类、以及分类所对应的索引
 # 也可使用numpy
 # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
@@ -55,6 +62,7 @@ def get_classes_indexes_counts(y, output=False):
     if output:
         print("每种类别的数量：", counts)
     return classes, counts
+
 
 def get_counts(y, output=False):
     # 统计每个类别的个数，y.max()+1是类别的个数
