@@ -1,12 +1,47 @@
+
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
+from sklearn.base import clone
 import numpy as np
 
 
-# 得到
+def k_fold_cross_validation_with_soft_labels(model, X, y, n_splits=5):
+    """
+    Perform 5-fold cross-validation and generate soft labels (probability predictions).
 
+    Parameters:
+    - model: A sklearn-compatible model with a `predict_proba` method.
+    - X: Feature matrix (numpy array or pandas DataFrame).
+    - y: Target vector (numpy array or pandas Series).
+
+    Returns:
+    - soft_labels: A numpy array containing the soft labels for each sample.
+    - scores: A list of accuracy scores for each fold.
+    """
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)  # 5-fold cross-validation
+    soft_labels = np.zeros((len(y), len(np.unique(y))))  # Initialize array for soft labels
+    scores = []
+    for train_index, test_index in kf.split(X):
+        # Split data into train and test
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        # Clone and fit the model on the training set
+        model_clone = clone(model)
+        model_clone.fit(X_train, y_train)
+        # Generate soft labels (probability predictions)
+        y_proba = model_clone.predict_proba(X_test)
+        soft_labels[test_index] = y_proba
+
+        # Evaluate the model
+        y_pred = np.argmax(y_proba, axis=1)  # Convert probabilities to class predictions
+        score = accuracy_score(y_test, y_pred)
+        scores.append(score)
+
+    return soft_labels, scores
 # 得到分类、以及分类所对应的索引
 # 也可使用numpy
 # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
-# unique_elements, counts, indices = np.unique(labels, return_counts=True, return_inverse=True)
+# unique_elements, counts = np.unique(labels, return_counts=True)
 def get_classes_indexes_counts(y, output=False):
     # 统计每个类别的个数，y.max()+1是类别的个数
     num_class = y.max() + 1
