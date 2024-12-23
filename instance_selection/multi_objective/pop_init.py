@@ -46,10 +46,19 @@ def init_population_for_balanced_dataset(population, y_train, ratio, show_detail
             print(f"类别: {element}, 个数: {len(class_indices[element])}")
     for i in range(len(population)):
         # 对于每个类，随机选择 num_instances 个不同的索引，生成一个新的dict
-        # 在num_instances和
-        select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
-                                class_indices.items()}
+        # 在num_instances和counts中对应的实例数量之间随机生成一个数字
+
+        # select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
+        #                         class_indices.items()}
+        select_class_indices = {}
+        for i, item in enumerate(class_indices.items()):
+            random_number = random.randint(num_instances, counts[i])
+            print(random_number)
+            print(item[0])
+            print(item[1])
+            selected_indices = np.random.choice(item[1], random_number, replace=False)
+            select_class_indices[item[0]] = selected_indices
         for element in unique_elements:
-            for index in select_class_indices[element]:
-                population[i][index] = 1
+            for indexs in select_class_indices[element]:
+                population[i][indexs] = 1
     return population
