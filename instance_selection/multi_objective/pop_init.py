@@ -51,13 +51,34 @@ def init_population_for_balanced_dataset(population, y_train, ratio, show_detail
         # select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
         #                         class_indices.items()}
         select_class_indices = {}
-        for i, item in enumerate(class_indices.items()):
-            random_number = random.randint(num_instances, counts[i])
-            print(random_number)
-            print(item[0])
-            print(item[1])
+        for index, item in enumerate(class_indices.items()):
+            random_number = random.randint(num_instances, counts[index])
             selected_indices = np.random.choice(item[1], random_number, replace=False)
             select_class_indices[item[0]] = selected_indices
+        for element in unique_elements:
+            for indexs in select_class_indices[element]:
+                population[i][indexs] = 1
+    return population
+
+# 平衡数据集(只在初始化个体时使用)
+# 得到分类、以及分类所对应的数量，初始化个体为平衡数据集
+def init_population_for_balanced_dataset_2(population, y_train, ratio, show_details=False):
+    # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
+    unique_elements, counts = np.unique(y_train, return_counts=True)
+    num_instances = int(np.ceil(counts.min() * ratio))
+    # 构造每个类别的索引列表
+    class_indices = {element: np.where(y_train == element)[0] for element in unique_elements}
+    if show_details:
+        # 输出类别和类别对应的数量
+        # 遍历class_indices,输出每个类，以及每个类的数量，以及索引
+        for element in unique_elements:
+            print(f"类别: {element}, 个数: {len(class_indices[element])}")
+    for i in range(len(population)):
+        # 对于每个类，随机选择 num_instances 个不同的索引，生成一个新的dict
+        # 在num_instances和counts中对应的实例数量之间随机生成一个数字
+
+        select_class_indices = {element: np.random.choice(indices, num_instances, replace=False) for element, indices in
+                                class_indices.items()}
         for element in unique_elements:
             for indexs in select_class_indices[element]:
                 population[i][indexs] = 1
