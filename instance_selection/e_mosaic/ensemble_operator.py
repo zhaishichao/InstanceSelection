@@ -3,6 +3,9 @@ import numpy as np
 from scipy.stats import gmean, mode
 from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score, classification_report
 
+from instance_selection.e_mosaic.fitness import calculate_accuracy
+from utils.dataset_utils import get_classes_indexes_counts
+
 
 def vote_ensembles(ensembles, x_test, y_test, show_result=False):
     y_pred_labels_ensembles = []
@@ -21,6 +24,9 @@ def vote_ensembles(ensembles, x_test, y_test, show_result=False):
     # 计算 ROC AUC（ovo+macro）、G-Mean、recall_per_class
     geometric_mean, auc_ovo_macro, recall_per_class = calculate_gmean_mauc(ensemble_predictions_prob, y_test)
     # 计算准确率
+    classes_train, counts_train = get_classes_indexes_counts(y_test)  # 统计每个类别的个数
+    weights_test = (1 / counts_train.astype(float)) / np.sum(1 / counts_train.astype(float))  # 计算每个类的权重，用于计算每个类别的权重
+    _, Acc2, _ = calculate_accuracy(final_pred_result, y_test, weights_test)
     accuracy = accuracy_score(y_test, final_pred_result)
     if show_result:
         print(f'Accuracy: {accuracy:.2f}')
@@ -31,7 +37,7 @@ def vote_ensembles(ensembles, x_test, y_test, show_result=False):
         print("Confusion Matrix:")
         print(confusion_matrix(y_test, final_pred_result))
     return round(geometric_mean, 4), round(auc_ovo_macro, 4), np.array(
-        ["{:.4f}".format(x) for x in recall_per_class]).tolist()  # 保留六位小数
+        ["{:.4f}".format(x) for x in recall_per_class]).tolist(), Acc2  # 保留六位小数
 
 
 # 计算gmean,mauc

@@ -24,3 +24,13 @@ def calculate_gmean_mauc(y_pred_proba, y):
     # 计算G-Mean
     geometric_mean = gmean(recall_per_class)
     return round(geometric_mean, 4), round(auc_ovo_macro, 4), recall_per_class
+
+def calculate_accuracy(y_pred, y, weights_train):
+    ######################计算混淆矩阵#########################
+    cm = confusion_matrix(y, y_pred)
+    tp_per_class = cm.diagonal()  # 对角线元素表示每个类预测正确的个数，对角线求和，即所有预测正确的实例个数之和，计算Acc1
+    s_per_class = cm.sum(axis=1)
+    Acc1 = np.sum(tp_per_class) / np.sum(s_per_class)  # Acc1
+    Acc2 = np.mean(tp_per_class.astype(float) / s_per_class.astype(float))  # Acc2
+    Acc3 = np.mean((tp_per_class.astype(float) / s_per_class.astype(float)) * weights_train)  # Acc3
+    return round(Acc1, 4), round(Acc2, 4), round(Acc3, 4)
