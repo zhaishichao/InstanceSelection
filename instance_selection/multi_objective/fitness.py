@@ -1,5 +1,6 @@
 import numpy as np
-from sklearn.metrics import confusion_matrix
+from scipy.stats import gmean
+from sklearn.metrics import confusion_matrix, roc_auc_score
 
 
 ######################################
@@ -22,3 +23,14 @@ def calculate_accuracy(y_pred, y, weights_train):
     Acc2 = np.mean(tp_per_class.astype(float) / s_per_class.astype(float))  # Acc2
     Acc3 = np.mean((tp_per_class.astype(float) / s_per_class.astype(float)) * weights_train)  # Acc3
     return round(Acc1, 4), round(Acc2, 4), round(Acc3, 4)
+
+def calculate_gmean_mauc(y_pred_proba, y):
+    # 计算 ROC AUC（ovo+macro）
+    auc_ovo_macro = roc_auc_score(y, y_pred_proba, multi_class="ovo", average="macro")
+    y_pred = np.argmax(y_pred_proba, axis=1)
+    cm = confusion_matrix(y, y_pred)
+    # 计算每类召回率（每类正确预测个数 / 该类总数）
+    recall_per_class = cm.diagonal() / cm.sum(axis=1)
+    # 计算G-Mean
+    geometric_mean = gmean(recall_per_class)
+    return round(geometric_mean, 4), round(auc_ovo_macro, 4), recall_per_class
