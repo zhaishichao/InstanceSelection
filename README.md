@@ -1,5 +1,2 @@
-## Evolutionary Computation
-
-
 
 ## Instance Selection
