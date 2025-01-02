@@ -3,7 +3,7 @@ from array import array
 from deap import creator, base, tools
 
 from instance_selection.operator.duplicate_process import find_duplicates, remove_duplicates
-from instance_selection.operator.fitness import fitness_function
+from instance_selection.operator.fitness import calculate_fitness
 from instance_selection.operator.genetic_operator import mutate_binary_inversion
 from instance_selection.operator.init_population import init_by_one_or_zero, init_population_based_balanced_method
 
@@ -20,7 +20,7 @@ def init_toolbox(y_train):
     toolbox.register("init_population", init_population_based_balanced_method, y_train=y_train,
                      ratio=0.9)  # 初始化为平衡数据集（实例个数为min*0.9）
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)  # 种群初始化
-    toolbox.register("evaluate", fitness_function)  # 评价函数
+    toolbox.register("evaluate", calculate_fitness)  # 评价函数
     toolbox.register("mate", tools.cxOnePoint)  # 交叉
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
     toolbox.register("select", tools.selNSGA2)  # NSGA-II选择（非支配排序后）
