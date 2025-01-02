@@ -2,7 +2,7 @@ from array import array
 
 from deap import creator, base, tools
 
-from instance_selection.operator.duplicate_process import find_duplicates, remove_duplicates
+from instance_selection.operator.duplicate_process import remove_duplicates
 from instance_selection.operator.fitness import calculate_fitness
 from instance_selection.operator.genetic_operator import mutate_binary_inversion
 from instance_selection.operator.init_population import init_by_one_or_zero, init_population_based_balanced_method
@@ -24,6 +24,5 @@ def init_toolbox(y_train):
     toolbox.register("mate", tools.cxOnePoint)  # 交叉
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
     toolbox.register("select", tools.selNSGA2)  # NSGA-II选择（非支配排序后）
-    toolbox.register("find_duplicates", find_duplicates)  # 找到种群中重复个体的索引对
     toolbox.register("remove_duplicates", remove_duplicates)  # 去重
     return toolbox
