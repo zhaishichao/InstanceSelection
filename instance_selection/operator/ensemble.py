@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import mode
 
 
-def vote_result_ensembles(ensembles, x_test, y_test, result='soft'):
+def vote_result_ensembles(ensembles, x_test, result='soft'):
     y_pred_labels_ensembles = []
     y_pred_prob_labels_ensembles = []
     for ensemble in ensembles:

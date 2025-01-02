@@ -51,7 +51,9 @@ def get_distribution(y):
     # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
     unique_elements, counts = np.unique(y, return_counts=True)
     # 构造每个类别的索引列表
-    class_indices = {element: np.where(y == element)[0] for element in unique_elements}
+    class_indices=[]
+    for element in unique_elements:
+        class_indices.append(np.where(y == element)[0])
     return unique_elements, class_indices, counts
 
 

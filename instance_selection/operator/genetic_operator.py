@@ -41,7 +41,7 @@ def selTournamentNDCD(individuals, k, tournsize):
     for i in range(k):
         aspirants = tools.selRandom(individuals, tournsize)  # 随机选择tournsize个个体
         pareto_fronts = tools.sortNondominated(aspirants, len(aspirants))  # 进行非支配排序
-        tools.assignCrowdingDist(pareto_fronts[0])
+        tools.emo.assignCrowdingDist(pareto_fronts[0])
         pareto_first_front = sorted(pareto_fronts[0], key=attrgetter("fitness.crowding_dist"),
                                       reverse=True)  # 按拥挤度降序排列
         chosen.append(pareto_first_front[0])  # 选择第一个等级中拥挤度最大的

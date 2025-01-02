@@ -1,4 +1,4 @@
-from array import array
+import array
 
 from deap import creator, base, tools
 
@@ -24,5 +24,5 @@ def init_toolbox(y_train):
     toolbox.register("mate", tools.cxOnePoint)  # 交叉
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
     toolbox.register("select", tools.selNSGA2)  # NSGA-II选择（非支配排序后）
-    toolbox.register("remove_duplicates", remove_duplicates)  # 去重
+    toolbox.register("remove_duplicates", remove_duplicates, penalty_factor=0.0)  # 去重
     return toolbox
