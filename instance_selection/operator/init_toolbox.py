@@ -3,7 +3,7 @@ from array import array
 from deap import creator, base, tools
 
 from instance_selection.operator.duplicate_process import remove_duplicates
-from instance_selection.operator.fitness import calculate_fitness
+from instance_selection.operator.metrics import calculate_fitness
 from instance_selection.operator.genetic_operator import mutate_binary_inversion
 from instance_selection.operator.init_population import init_by_one_or_zero, init_population_based_balanced_method
 
