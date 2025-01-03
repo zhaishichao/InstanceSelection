@@ -4,11 +4,11 @@ from deap import creator, base, tools
 
 from instance_selection.operator.duplicate_process import remove_duplicates
 from instance_selection.operator.metrics import calculate_fitness
-from instance_selection.operator.genetic_operator import mutate_binary_inversion
+from instance_selection.operator.genetic_operator import mutate_binary_inversion, selNSGA2
 from instance_selection.operator.init_population import init_by_one_or_zero, init_population_based_balanced_method
 
 
-def init_toolbox(y_train):
+def init_toolbox_emosaic(y_train):
     NDIM = len(y_train)  # 个体基因长度
     # 最大化评价目标
     creator.create("FitnessMaxAndMax", base.Fitness, weights=(1.0, 1.0))
@@ -23,6 +23,6 @@ def init_toolbox(y_train):
     toolbox.register("evaluate", calculate_fitness)  # 评价函数
     toolbox.register("mate", tools.cxOnePoint)  # 交叉
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
-    toolbox.register("select", tools.selNSGA2)  # NSGA-II选择（非支配排序后）
+    toolbox.register("select", selNSGA2)  # NSGA-II选择（非支配排序后）
     toolbox.register("remove_duplicates", remove_duplicates, penalty_factor=0.0)  # 去重
     return toolbox

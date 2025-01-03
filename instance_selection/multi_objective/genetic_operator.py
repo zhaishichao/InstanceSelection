@@ -5,6 +5,8 @@ import math
 from operator import attrgetter, itemgetter
 import random
 
+import numpy as np
+
 
 ######################################
 #      mutate(二进制随机反转)           #
@@ -174,27 +176,29 @@ def sortNondominated(individuals, k, first_front_only=False):
     return fronts
 
 
-def assignCrowdingDist_PFC(individuals, x_test, y_test):
-    """Assign a crowding distance to each individual's fitness. The
+def assignCrowdingDist_PFC(individuals):
+    """
+    Assign a crowding distance to each individual's fitness. The
     crowding distance can be retrieve via the :attr:`crowding_dist`
     attribute of each individual's fitness.
     """
     if len(individuals) == 0:
         return
-    pred_lists = []  # 每个个体的预测结果， 0表示对应实例预测错误，1表示预测正确
+    failpat=[]
     for ind in individuals:
-        y_pred = ind.mlp.predict(x_test)  # 模型预测结果
-        binary_list = [1 if x == y else 0 for x, y in zip(y_pred, y_test)]  # 0表示对应实例预测错误，1表示预测正确
-        pred_lists.append(binary_list)
+        y_sub, y_pred_proba=ind.y_sub_and_pred_proba  # 训练子集和对应的预测软标签
+        y_pred = np.argmax(y_pred_proba, axis=1)  # 模型预测结果
+        binary_sequence = [1 if y1 == y2 else 0 for y1, y2 in zip(y_sub, y_pred)]  # 0表示对应实例预测错误，1表示预测正确
+        failpat.append(binary_sequence)
 
     accfailcred = [[0 for _ in range(len(individuals))] for _ in range(len(individuals))]  #
     for i in range(len(individuals) - 1):
-        count_zeros_i = sum(1 for x in pred_lists[i] if x == 0)
+        num_error_i = sum(1 for x in failpat[i] if x == 0)
         for j in range(i + 1, len(individuals)):
             # 计算汉明距离
-            hamming_distance = sum(x != y for x, y in zip(pred_lists[i], pred_lists[j]))
-            count_zeros_j = sum(1 for x in pred_lists[j] if x == 0)
-            accfailcred[i][j] = 1.0 * hamming_distance / (count_zeros_i + count_zeros_j)
+            hamming_distance = sum(x != y for x, y in zip(failpat[i], failpat[j]))
+            num_error_j = sum(1 for x in failpat[j] if x == 0)
+            accfailcred[i][j] = 1.0 * hamming_distance / (num_error_i + num_error_j)
             accfailcred[j][i] = accfailcred[i][j]
     # 对每一行求和
     row_sum_accfailcred = [sum(row) for row in accfailcred]

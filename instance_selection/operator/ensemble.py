@@ -1,6 +1,8 @@
 # 集成分类器的投票
 import numpy as np
 from scipy.stats import mode
+from sklearn.base import clone
+from utils.dataset_utils import get_subset
 
 
 def vote_result_ensembles(ensembles, x_test, result='soft'):
@@ -36,3 +38,15 @@ def calculate_average_gmean_mauc(individuals):
     avg_gmean = sum_gmean / num_ensembles
     avg_mauc = sum_mauc / num_ensembles
     return round(avg_gmean, 6), round(avg_mauc, 6)
+
+# 个体的集成
+def ensemble_individuals(individuals, model, x_train, y_train):
+    ensembles = []
+    for ind in individuals:
+        x_sub, y_sub = get_subset(ind, x_train, y_train)
+        # 用实例选择的子集训练模型
+        model_clone = clone(model)
+        model_clone.fit(x_sub, y_sub)
+        ind.model = model_clone
+        ensembles.append(ind.model)
+    return ensembles
