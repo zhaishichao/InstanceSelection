@@ -4,7 +4,7 @@ from scipy.stats import mode
 from sklearn.base import clone
 from utils.dataset_utils import get_subset
 
-
+# 集成分类器的预测结果
 def vote_result_ensembles(ensembles, x_test, result='soft'):
     y_pred_labels_ensembles = []
     y_pred_prob_labels_ensembles = []
@@ -26,20 +26,7 @@ def vote_result_ensembles(ensembles, x_test, result='soft'):
     else:
         raise ValueError('result must be "soft" or "hard"')  # 提示出错
 
-
-def calculate_average_gmean_mauc(individuals):
-    num_ensembles = len(individuals)
-    sum_gmean = 0
-    sum_mauc = 0
-    for ind in individuals:
-        sum_gmean = sum_gmean + ind.gmean
-        sum_mauc = sum_mauc + ind.mauc
-    # 求平均值
-    avg_gmean = sum_gmean / num_ensembles
-    avg_mauc = sum_mauc / num_ensembles
-    return round(avg_gmean, 6), round(avg_mauc, 6)
-
-# 个体的集成
+# 集成个体
 def ensemble_individuals(individuals, model, x_train, y_train):
     ensembles = []
     for ind in individuals:
