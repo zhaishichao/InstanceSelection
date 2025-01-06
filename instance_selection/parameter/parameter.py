@@ -5,7 +5,7 @@ RANDOM_SEED = 42
 
 # 遗传算法迭代参数设置
 NGEN = 30  # 迭代次数
-POPSIZE = 40  # 种群数量
+POPSIZE = 30  # 种群数量
 CXPB = 1.0  # 交叉因子/交叉率
 MR = 0.2  # 突变因子/突变率
 STOP_SIGN = 5  # 停止标志
@@ -43,4 +43,11 @@ Chess = {
     'HIDDEN_SIZE': 20,
     'MAX_ITER': 200,
     'LEARNING_RATE': 0.1
+}
+
+Australian = {
+    'DATASETNAME': 'Australian.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 1000,
+    'LEARNING_RATE': 0.001
 }

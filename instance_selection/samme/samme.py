@@ -166,7 +166,7 @@ if __name__ == "__main__":
     gmean_results = []
     num_runs = 30
     for i in range(num_runs):
-        samme = SAMME(40, model, x_train, y_train)
+        samme = SAMME(POPSIZE, model, x_train, y_train)
         samme.train()
         y_pred = samme.predict(x_test)
         cm = confusion_matrix(y_test, y_pred)
