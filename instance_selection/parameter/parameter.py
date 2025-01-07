@@ -51,3 +51,54 @@ Australian = {
     'MAX_ITER': 1000,
     'LEARNING_RATE': 0.001
 }
+
+Car = {
+    'DATASETNAME': 'Car.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 200,
+    'LEARNING_RATE': 0.1
+}
+
+Balance_Scale = {
+    'DATASETNAME': 'Balance_Scale.mat',
+    'HIDDEN_SIZE': 15,
+    'MAX_ITER': 500,
+    'LEARNING_RATE': 0.1
+}
+
+Ecoli = {
+    'DATASETNAME': 'Ecoli.mat',
+    'HIDDEN_SIZE': 5,
+    'MAX_ITER': 200,
+    'LEARNING_RATE': 0.1
+}
+
+Glass = {
+    'DATASETNAME': 'Glass.mat',
+    'HIDDEN_SIZE': 10,
+    'MAX_ITER': 2000,
+    'LEARNING_RATE': 0.1
+}
+
+Splice = {
+    'DATASETNAME': 'Splice.mat',
+    'HIDDEN_SIZE': 5,
+    'MAX_ITER': 100,
+    'LEARNING_RATE': 0.1
+}
+
+Letter = {
+    'DATASETNAME': 'Letter.mat',
+    'HIDDEN_SIZE': 10,
+    'MAX_ITER': 1000,
+    'LEARNING_RATE': 0.1
+}
+
+
+
+
+
+
+
+
+
