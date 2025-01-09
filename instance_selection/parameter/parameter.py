@@ -1,3 +1,5 @@
+# 数据集路径
+DATASET_PATH = '../../data/dataset/imbalance'
 # MLP参数设置
 N_SPLITS = 5  # k-fold交叉验证的折数
 LEARNING_RATE = 0.1  # 学习率
@@ -45,13 +47,6 @@ Chess = {
     'LEARNING_RATE': 0.1
 }
 
-Australian = {
-    'DATASETNAME': 'Australian.mat',
-    'HIDDEN_SIZE': 20,
-    'MAX_ITER': 1000,
-    'LEARNING_RATE': 0.001
-}
-
 Car = {
     'DATASETNAME': 'Car.mat',
     'HIDDEN_SIZE': 20,
@@ -93,12 +88,3 @@ Letter = {
     'MAX_ITER': 1000,
     'LEARNING_RATE': 0.1
 }
-
-
-
-
-
-
-
-
-

@@ -190,7 +190,7 @@ class SAMME:
 if __name__ == "__main__":
     DATASET = Contraceptive  # 数据集名称（包含对应参数的字典形式）
     datasetname = DATASET['DATASETNAME'].split('.')[0]
-    mat_data = sio.loadmat('../../data/dataset/' + DATASET['DATASETNAME'])  # 加载、划分数据集
+    mat_data = sio.loadmat(DATASET_PATH + DATASET['DATASETNAME'])  # 加载、划分数据集
     x = mat_data['X']
     y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=RANDOM_SEED)  # 划分数据集
