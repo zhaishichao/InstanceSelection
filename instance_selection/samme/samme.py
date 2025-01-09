@@ -6,13 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 
+from instance_selection.operator.metrics import calculate_gmean_mauc
 from instance_selection.parameter.parameter import *
 import scipy.io as sio  # 从.mat文件中读取数据集
 
-"""
-@author: Jia Geng
-@email: jxg570@miami.edu
-"""
 
 
 class SAMME:
@@ -115,17 +112,6 @@ class SAMME:
         :return: predict class
         """
 
-        # pooled_prediction = np.zeros((self.num_cats,), dtype=np.float32)
-        #
-        # for learner_idx, learner in enumerate(self.sorted_learners):
-        #     # encode the prediction in to balanced array
-        #     predicted_cat = learner.predict(X)
-        #     prediction = np.full((self.num_cats,), fill_value=-1 / (self.num_cats - 1), dtype=np.float32)
-        #     prediction[predicted_cat] = 1
-        #     pooled_prediction += prediction * self.learner_weights[learner_idx]
-        #
-        # return np.argmax(pooled_prediction)
-
         # 获取样本数量
         num_samples = X.shape[0]
         # 初始化预测池，维度为 (num_samples, num_cats)
@@ -148,10 +134,61 @@ class SAMME:
 
         # 返回每个样本的最终预测类别
         return np.argmax(pooled_prediction, axis=1)
+    def predict_prob_pseudo(self, X):
+        """
+        Predict using the boosted learner
+        :param X:
+        :return: predict class
+        """
+
+        # 获取样本数量
+        num_samples = X.shape[0]
+        # 初始化预测池，维度为 (num_samples, num_cats)
+        pooled_prediction = np.zeros((num_samples, self.num_cats), dtype=np.float32)
+
+        # 遍历所有弱学习器
+        for learner_idx, learner in enumerate(self.sorted_learners):
+            # 当前弱学习器对所有样本的预测
+            predicted_cats = learner.predict(X)  # 假设 predict 支持批量预测，返回形状为 (num_samples,)
+
+            # 初始化平衡预测数组，维度为 (num_samples, num_cats)
+            prediction = np.full((num_samples, self.num_cats),
+                                 fill_value=-1 / (self.num_cats - 1), dtype=np.float32)
+
+            # 将对应预测类别的位置设置为 1
+            prediction[np.arange(num_samples), predicted_cats] = 1
+
+            # 加权累加到预测池
+            pooled_prediction += prediction * self.learner_weights[learner_idx]
+        # 对每一行进行softmax归一化
+        exp_preds = np.exp(pooled_prediction - np.max(pooled_prediction, axis=1, keepdims=True))  # 防止溢出
+        softmax_preds = exp_preds / np.sum(exp_preds, axis=1, keepdims=True)
+        # 返回每个样本的最终预测类别
+        return softmax_preds
+    def predict_prob(self, X):
+        """
+        Predict using the boosted learner
+        :param X:
+        :return: predict class
+        """
+        def _samme_proba(estimator, n_classes, X):
+            proba = estimator.predict_proba(X)
+            np.clip(proba, np.finfo(proba.dtype).eps, None, out=proba)
+            log_proba = np.log(proba)
+            return (n_classes - 1) * (log_proba - (1.0 / n_classes) * log_proba.sum(axis=1)[:, np.newaxis])
+
+        pred = sum(
+            _samme_proba(estimator, len(getattr(estimator, "classes_", None)), X) for estimator in self.sorted_learners
+        )
+        pred /= self.learner_weights.sum()
+        # 对每一行进行softmax归一化
+        exp_preds = np.exp(pred - np.max(pred, axis=1, keepdims=True))  # 防止溢出
+        softmax_preds = exp_preds / np.sum(exp_preds, axis=1, keepdims=True)
+        return softmax_preds
 
 
 if __name__ == "__main__":
-    DATASET = Satellite  # 数据集名称（包含对应参数的字典形式）
+    DATASET = Contraceptive  # 数据集名称（包含对应参数的字典形式）
     datasetname = DATASET['DATASETNAME'].split('.')[0]
     mat_data = sio.loadmat('../../data/dataset/' + DATASET['DATASETNAME'])  # 加载、划分数据集
     x = mat_data['X']
@@ -162,28 +199,17 @@ if __name__ == "__main__":
     x_test = scaler.transform(x_test)
     model = MLPClassifier(hidden_layer_sizes=(DATASET['HIDDEN_SIZE'],), max_iter=DATASET['MAX_ITER'],
                           random_state=RANDOM_SEED, learning_rate_init=DATASET['LEARNING_RATE'])
-    # samme = SAMME(30, model, x_train, y_train)
     gmean_results = []
+    mauc_results = []
     num_runs = 30
     for i in range(num_runs):
         samme = SAMME(POPSIZE, model, x_train, y_train)
         samme.train()
-        y_pred = samme.predict(x_test)
-        cm = confusion_matrix(y_test, y_pred)
-        # 计算每类召回率（每类正确预测个数 / 该类总数）
-        recall_per_class = cm.diagonal() / cm.sum(axis=1)
-        # 计算G-Mean
-        geometric_mean = gmean(recall_per_class)
-        # 输出Gmean
-        print(f"第{i + 1}次执行，G-Mean: {geometric_mean}")
-        gmean_results.append(geometric_mean)
-    # samme.train()
-    # y_pred = samme.predict(x_test)
-    # cm = confusion_matrix(y_test, y_pred)
-    # # 计算每类召回率（每类正确预测个数 / 该类总数）
-    # recall_per_class = cm.diagonal() / cm.sum(axis=1)
-    # # 计算G-Mean
-    # geometric_mean = gmean(recall_per_class)
-    # 输出Gmean
-    print(f"G-Mean: {geometric_mean}")
+        y_pred_prob = samme.predict_prob(x_test)
+        gmean, mauc, recall_per_class = calculate_gmean_mauc(y_pred_prob, y_test)
+
+        print(f"第{i + 1}次执行，G-Mean: {gmean},mAUC: {mauc},Recall: {recall_per_class}")
+        gmean_results.append(gmean)
+        mauc_results.append(mauc)
     print(f"Avg-G-Mean: {np.mean(gmean_results, axis=0)}")
+    print(f"Avg-mAUC: {np.mean(mauc_results, axis=0)}")
