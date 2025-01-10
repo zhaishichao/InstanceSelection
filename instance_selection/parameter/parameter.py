@@ -1,5 +1,6 @@
 # 数据集路径
-DATASET_PATH = '../../data/dataset/imbalance'
+IMBALANCED_DATASET_PATH = '../../data/dataset/imbalance/'
+DATASET_PATH = '../../data/dataset/'
 # MLP参数设置
 N_SPLITS = 5  # k-fold交叉验证的折数
 LEARNING_RATE = 0.1  # 学习率
