@@ -2,7 +2,7 @@ import array
 
 from deap import creator, base, tools
 
-from instance_selection.operator.constraint import get_feasible_infeasible
+from instance_selection.operator.constraint import get_feasible_infeasible, individuals_constraints_in_classes
 from instance_selection.operator.duplicate_process import remove_duplicates
 from instance_selection.operator.metrics import fitness_gmean_mauc, fitness_accuracy, evaluate_individuals
 from instance_selection.operator.genetic_operator import mutate_binary_inversion, selNSGA2
@@ -26,6 +26,8 @@ def init_toolbox_emosaic(model, x_train, y_train, n_splits=5, random_seed=42):
     toolbox.register("mate", tools.cxOnePoint)  # 交叉
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
     toolbox.register("select", selNSGA2)  # NSGA-II选择（非支配排序后）
+    toolbox.register("individuals_constraints", individuals_constraints_in_classes, x_train=x_train,
+                     y_train=y_train)  # 限制每个类至少有一个实例被选择
     toolbox.register("remove_duplicates", remove_duplicates, penalty_factor=0.0)  # 去重
     return toolbox
 
@@ -47,6 +49,8 @@ def init_toolbox_eseic(model, x_train, y_train, weights_train, constraints, n_sp
     toolbox.register("mate", tools.cxOnePoint)  # 交叉
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
     toolbox.register("select", selNSGA2)  # NSGA-II选择（非支配排序后）
+    toolbox.register("individuals_constraints", individuals_constraints_in_classes, x_train=x_train,
+                     y_train=y_train)  # 限制每个类至少有一个实例被选择
     toolbox.register("remove_duplicates", remove_duplicates, penalty_factor=0.0)  # 去重
     toolbox.register("get_feasible_infeasible", get_feasible_infeasible, constraints=constraints)  # 获取种群的可行解与不可行解
     return toolbox
