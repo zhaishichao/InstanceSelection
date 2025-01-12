@@ -1,4 +1,4 @@
-import imageio
+import imageio.v2 as imageio
 import matplotlib.pyplot as plt
 # 图像转换成视频
 def convert_images_to_video(input_path, output_path, videofilename, size=800):
