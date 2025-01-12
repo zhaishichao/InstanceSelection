@@ -6,6 +6,7 @@ import random
 import numpy as np
 from deap import tools
 
+
 ######################################
 #      mutate(二进制随机反转)           #
 ######################################
@@ -19,6 +20,7 @@ def mutate_binary_inversion(individual, mutation_rate=0.2):
         else:
             individual[index] = 0
     return individual,
+
 
 ######################################
 #    锦标赛选择，基于非支配排序和拥挤距离   #
@@ -44,7 +46,7 @@ def selTournamentNDCD(individuals, k, tournsize):
         pareto_fronts = tools.sortNondominated(aspirants, len(aspirants))  # 进行非支配排序
         tools.emo.assignCrowdingDist(pareto_fronts[0])
         pareto_first_front = sorted(pareto_fronts[0], key=attrgetter("fitness.crowding_dist"),
-                                      reverse=True)  # 按拥挤度降序排列
+                                    reverse=True)  # 按拥挤度降序排列
         chosen.append(pareto_first_front[0])  # 选择第一个等级中拥挤度最大的
     return chosen
 
@@ -90,9 +92,9 @@ def assignCrowdingDist_PFC(individuals):
     """
     if len(individuals) == 0:
         return
-    failpat=[]
+    failpat = []
     for ind in individuals:
-        y_sub, y_pred_proba=ind.y_sub_and_pred_proba  # 训练子集和对应的预测软标签
+        y_sub, y_pred_proba = ind.y_sub_and_pred_proba  # 训练子集和对应的预测软标签
         y_pred = np.argmax(y_pred_proba, axis=1)  # 模型预测结果
         binary_sequence = [1 if y1 == y2 else 0 for y1, y2 in zip(y_sub, y_pred)]  # 0表示对应实例预测错误，1表示预测正确
         failpat.append(binary_sequence)
@@ -104,7 +106,10 @@ def assignCrowdingDist_PFC(individuals):
             # 计算汉明距离
             hamming_distance = sum(x != y for x, y in zip(failpat[i], failpat[j]))
             num_error_j = sum(1 for x in failpat[j] if x == 0)
-            accfailcred[i][j] = 1.0 * hamming_distance / (num_error_i + num_error_j)
+            if (num_error_i + num_error_j) > 0:
+                accfailcred[i][j] = 1.0 * hamming_distance / (num_error_i + num_error_j)
+            else:
+                accfailcred[i][j] = 1.0 * hamming_distance
             accfailcred[j][i] = accfailcred[i][j]
     # 对每一行求和
     row_sum_accfailcred = [sum(row) for row in accfailcred]
