@@ -89,3 +89,13 @@ Letter = {
     'MAX_ITER': 1000,
     'LEARNING_RATE': 0.1
 }
+
+
+Dermatology = {
+    'DATASETNAME': 'Dermatology.mat',
+    'HIDDEN_SIZE': 2,
+    'MAX_ITER': 1000,
+    'LEARNING_RATE': 0.1
+}
+
+

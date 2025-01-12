@@ -56,17 +56,21 @@ def individuals_constraints_in_classes(individuals, x_train, y_train):
     for individual in individuals:
         # 获取实例子集
         _, y_sub = get_subset(individual, x_train, y_train)
-        unique_elements_sub, _ = np.unique(y_sub, return_counts=True)
+        unique_elements_sub, counts_sub = np.unique(y_sub, return_counts=True)
         unique_elements_sub_set = set(unique_elements_sub)
         # 对两个集合做差，得到差集（即未选择的类标签）
         unselected_set = unique_elements_set - unique_elements_sub_set
         # 如果差集不为空，则表示存在类没有被选择
+        for selected_element, count in zip(unique_elements_sub, counts_sub):
+            if count < 5:
+                # 将该类标签添加到unselected_set中
+                unselected_set.add(selected_element)
         if len(unselected_set) > 0:
             for unselected in unselected_set:
                 # 获取unselected类的训练集的实例个数
                 length = int(np.ceil(len(class_indices[unselected]) * 0.9))
                 # 在0-length之间随机生成一个数字
-                random_number = np.random.randint(1, length)
+                random_number = np.random.randint(5, length)
                 selected_indices = np.random.choice(class_indices[unselected], random_number, replace=False)
                 for index in selected_indices:
                     individual[index] = 1
