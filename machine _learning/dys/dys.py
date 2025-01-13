@@ -3,6 +3,10 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from instance_selection.operator.metrics import calculate_gmean_mauc
+from instance_selection.parameter.parameter import *
+import scipy.io as sio  # 从.mat文件中读取数据集
+
 
 class MLP:
     def __init__(self, input_size, hidden_sizes, output_size, learning_rate=0.01):
@@ -68,6 +72,20 @@ class MLP:
         y = y.reshape(1, -1)
         self.backward(x, y)
 
+    def train(self, X, Y, epochs=100):
+        """
+        使用批量训练方式更新模型参数
+        参数：
+        - X: 输入数据，形状为 (n_samples, n_features)
+        - Y: 独热编码标签，形状为 (n_samples, n_classes)
+        - epochs: 训练的迭代次数
+        """
+        for epoch in range(epochs):
+            self.backward(X, Y)  # 一次性用所有样本更新参数
+            if (epoch + 1) % 10 == 0:
+                loss = self.cross_entropy_loss(self.forward(X), Y)
+                print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss:.4f}")
+
     def predict_prob(self, x):
         return self.forward(x)
 
@@ -75,43 +93,66 @@ class MLP:
         probs = self.predict_prob(x)
         return np.argmax(probs, axis=1)
 
+    def cross_entropy_loss(self, y_pred, y_true):
+        """
+        计算交叉熵损失
+        参数：
+        - y_pred: 模型预测概率，形状为 (n_samples, n_classes)
+        - y_true: 独热编码标签，形状为 (n_samples, n_classes)
+        返回值：
+        - loss: 交叉熵损失值
+        """
+        m = y_true.shape[0]
+        return -np.sum(y_true * np.log(y_pred + 1e-9)) / m
+if __name__ == '__main__':
 
-# 加载鸢尾花数据集
-iris = load_iris()
-X = iris.data  # 特征
-y = iris.target  # 标签
+    DATASET = Satellite  # 数据集名称（包含对应参数的字典形式）
+    datasetname = DATASET['DATASETNAME'].split('.')[0]
+    mat_data = sio.loadmat(IMBALANCED_DATASET_PATH + DATASET['DATASETNAME'])  # 加载、划分数据集
+    x = mat_data['X']
+    y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=RANDOM_SEED)  # 划分数据集
 
-# 数据预处理
-# 将标签转换为独热编码
-encoder = OneHotEncoder(sparse_output=False)
-y_onehot = encoder.fit_transform(y.reshape(-1, 1))
+    # 加载鸢尾花数据集
+    # iris = load_iris()
+    # X = iris.data  # 特征
+    # y = iris.target  # 标签
 
-# 标准化特征
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
+    # 数据预处理
+    # 将标签转换为独热编码
+    encoder = OneHotEncoder(sparse_output=False)
+    y_onehot = encoder.fit_transform(y.reshape(-1, 1))
 
-# 划分训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(X, y_onehot, test_size=0.2, random_state=42)
+    # 划分训练集和测试集
+    x_train, x_test, y_train, y_test = train_test_split(x, y_onehot, test_size=0.2, random_state=RANDOM_SEED)
 
-# 创建 MLP 模型
-input_size = X_train.shape[1]  # 特征维度
-hidden_sizes = [10, 8]  # 两个隐藏层，大小分别为 10 和 8
-output_size = y_train.shape[1]  # 类别数
-mlp = MLP(input_size=input_size, hidden_sizes=hidden_sizes, output_size=output_size, learning_rate=0.01)
+    # 标准化特征
+    scaler = StandardScaler()  # 数据的标准化
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
 
-# 训练模型
-epochs = 1000
-for epoch in range(epochs):
-    for i in range(X_train.shape[0]):
-        mlp.train_one_sample(X_train[i], y_train[i])
-    if (epoch + 1) % 10 == 0:
-        print(f"Epoch {epoch + 1}/{epochs} completed")
+    # 创建 MLP 模型
+    input_size = x_train.shape[1]  # 特征维度
+    hidden_sizes = [DATASET['HIDDEN_SIZE'], ]  # 两个隐藏层，大小分别为 10 和 8
+    output_size = y_train.shape[1]  # 类别数
+    mlp = MLP(input_size=input_size, hidden_sizes=hidden_sizes, output_size=output_size, learning_rate=DATASET['LEARNING_RATE'])
 
-# 测试模型
-y_test_probs = mlp.predict_prob(X_test)
-y_test_preds = mlp.predict(X_test)
+    # 训练模型
+    epochs = DATASET['MAX_ITER']
+    # for epoch in range(epochs):
+    #     for i in range(x_train.shape[0]):
+    #         mlp.train_one_sample(x_train[i], y_train[i])
+    #     if (epoch + 1) % 10 == 0:
+    #         print(f"Epoch {epoch + 1}/{epochs} completed")
+    mlp.train(x_train, y_train, epochs)
 
-# 计算测试集准确率
-y_test_labels = np.argmax(y_test, axis=1)
-accuracy = np.mean(y_test_preds == y_test_labels)
-print(f"Test Accuracy: {accuracy * 100:.2f}%")
+    # 测试模型
+    y_test_probs = mlp.predict_prob(x_test)
+    y_test_preds = mlp.predict(x_test)
+
+    print(calculate_gmean_mauc(y_test_probs, np.argmax(y_test, axis=1)))
+
+    # 计算测试集准确率
+    y_test_labels = np.argmax(y_test, axis=1)
+    # accuracy = np.mean(y_test_preds == y_test_labels)
+    # print(f"Test Accuracy: {accuracy * 100:.2f}%")
