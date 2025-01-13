@@ -58,7 +58,7 @@ class SAMME:
         :return: void
         """
 
-        print("\nStart training SAMME..")
+        # print("\nStart training SAMME..")
         # initialize the weights for each data entry
         n, m = len(self.train_data), len(self.learners)
         self.entry_weights = np.full((n,), fill_value=1 / n, dtype=np.float32)
@@ -103,7 +103,7 @@ class SAMME:
 
         # normalize the learner weights
         self.learner_weights = self.learner_weights / self.learner_weights.sum()
-        print("Training completed.")
+        # print("Training completed.")
 
     def predict(self, X):
         """
@@ -188,7 +188,7 @@ class SAMME:
 
 
 if __name__ == "__main__":
-    DATASET = Contraceptive  # 数据集名称（包含对应参数的字典形式）
+    DATASET = Satellite  # 数据集名称（包含对应参数的字典形式）
     datasetname = DATASET['DATASETNAME'].split('.')[0]
     mat_data = sio.loadmat(IMBALANCED_DATASET_PATH + DATASET['DATASETNAME'])  # 加载、划分数据集
     x = mat_data['X']
