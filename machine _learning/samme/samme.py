@@ -188,7 +188,7 @@ class SAMME:
 
 
 if __name__ == "__main__":
-    DATASET = Satellite  # 数据集名称（包含对应参数的字典形式）
+    DATASET = Contraceptive  # 数据集名称（包含对应参数的字典形式）
     datasetname = DATASET['DATASETNAME'].split('.')[0]
     mat_data = sio.loadmat(IMBALANCED_DATASET_PATH + DATASET['DATASETNAME'])  # 加载、划分数据集
     x = mat_data['X']
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     for i in range(num_runs):
         samme = SAMME(POPSIZE, model, x_train, y_train)
         samme.train()
-        y_pred_prob = samme.predict_prob(x_test)
+        y_pred_prob = samme.predict_prob_pseudo(x_test)
         gmean, mauc, recall_per_class = calculate_gmean_mauc(y_pred_prob, y_test)
 
         print(f"第{i + 1}次执行，G-Mean: {gmean},mAUC: {mauc},Recall: {recall_per_class}")
