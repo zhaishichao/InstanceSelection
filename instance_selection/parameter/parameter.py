@@ -98,4 +98,11 @@ Dermatology = {
     'LEARNING_RATE': 0.1
 }
 
+Page_Blocks = {
+    'DATASETNAME': 'Page_Blocks.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 100,
+    'LEARNING_RATE': 0.1
+}
+
 
