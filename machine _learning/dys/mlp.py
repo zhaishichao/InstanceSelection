@@ -1,11 +1,6 @@
-"""Multi-layer Perceptron
-"""
-
-# Authors: Issam H. Laradji <issam.laradji@gmail.com>
-#          Andreas Mueller
-#          Jiyuan Qian
-# License: BSD 3 clause
-
+from instance_selection.operator.metrics import calculate_gmean_mauc
+from instance_selection.parameter.parameter import *
+import scipy.io as sio  # 从.mat文件中读取数据集
 import warnings
 from abc import ABCMeta, abstractmethod
 from itertools import chain
@@ -16,14 +11,13 @@ import scipy.optimize
 from sklearn.base import (
     BaseEstimator,
     ClassifierMixin,
-    RegressorMixin,
     _fit_context,
     is_classifier,
 )
 from sklearn.exceptions import ConvergenceWarning
-from sklearn.metrics import accuracy_score, r2_score
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import LabelBinarizer, OneHotEncoder, StandardScaler
 from sklearn.utils import (
     _safe_indexing,
     check_random_state,
@@ -53,14 +47,6 @@ def _pack(coefs_, intercepts_):
 
 
 class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
-    """Base class for MLP classification and regression.
-
-    Warning: This class should not be used directly.
-    Use derived classes instead.
-
-    .. versionadded:: 0.18
-    """
-
     _parameter_constraints: dict = {
         "hidden_layer_sizes": [
             "array-like",
@@ -482,13 +468,11 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
                 layer_units,
                 incremental,
             )
-
         # Run the LBFGS solver
         elif self.solver == "lbfgs":
             self._fit_lbfgs(
                 X, y, activations, deltas, coef_grads, intercept_grads, layer_units
             )
-
         # validate parameter weights
         weights = chain(self.coefs_, self.intercepts_)
         if not all(np.isfinite(w).all() for w in weights):
@@ -496,9 +480,7 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
                 "Solver produced non-finite parameter weights. The input data may"
                 " contain large values and need to be preprocessed."
             )
-
         return self
-
     def _fit_lbfgs(
         self, X, y, activations, deltas, coef_grads, intercept_grads, layer_units
     ):
@@ -1251,4 +1233,59 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
 
     def _more_tags(self):
         return {"multilabel": True}
+
+
+if __name__ == '__main__':
+
+    DATASET = Satellite  # 数据集名称（包含对应参数的字典形式）
+    datasetname = DATASET['DATASETNAME'].split('.')[0]
+    mat_data = sio.loadmat(IMBALANCED_DATASET_PATH + DATASET['DATASETNAME'])  # 加载、划分数据集
+    x = mat_data['X']
+    y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
+    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=RANDOM_SEED)  # 划分数据集
+
+    # 加载鸢尾花数据集
+    # iris = load_iris()
+    # X = iris.data  # 特征
+    # y = iris.target  # 标签
+
+    # 数据预处理
+    # 将标签转换为独热编码
+    encoder = OneHotEncoder(sparse_output=False)
+    y_onehot = encoder.fit_transform(y.reshape(-1, 1))
+
+    # 划分训练集和测试集
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=RANDOM_SEED)
+
+    # 标准化特征
+    scaler = StandardScaler()  # 数据的标准化
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
+
+    # 创建 MLP 模型
+    input_size = x_train.shape[1]  # 特征维度
+    hidden_sizes = [DATASET['HIDDEN_SIZE'], ]  # 两个隐藏层，大小分别为 10 和 8
+    # output_size = y_train.shape[1]  # 类别数
+    mlp = MLPClassifier(hidden_layer_sizes=(DATASET['HIDDEN_SIZE'],), max_iter=DATASET['MAX_ITER'],
+                      random_state=RANDOM_SEED, learning_rate_init=DATASET['LEARNING_RATE'])
+
+    # 训练模型
+    epochs = DATASET['MAX_ITER']
+    # for epoch in range(epochs):
+    #     for i in range(x_train.shape[0]):
+    #         mlp.train_one_sample(x_train[i], y_train[i])
+    #     if (epoch + 1) % 10 == 0:
+    #         print(f"Epoch {epoch + 1}/{epochs} completed")
+    mlp.fit(x_train, y_train)
+
+    # 测试模型
+    y_test_probs = mlp.predict_proba(x_test)
+    y_test_preds = mlp.predict(x_test)
+
+    print(calculate_gmean_mauc(y_test_probs, y_test))
+
+    # 计算测试集准确率
+    #y_test_labels = np.argmax(y_test, axis=1)
+    # accuracy = np.mean(y_test_preds == y_test_labels)
+    # print(f"Test Accuracy: {accuracy * 100:.2f}%")
 
