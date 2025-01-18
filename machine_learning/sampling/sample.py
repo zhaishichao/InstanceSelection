@@ -7,12 +7,14 @@ from instance_selection.operator.metrics import calculate_gmean_mauc
 from utils.dataset_utils import get_distribution
 
 
-def train_and_test(model, x_train, x_test, y_train, y_test):
+def train_and_test(model, x_train, x_test, y_train, y_test,show_distribution=False):
     scaler = StandardScaler()  # 数据的标准化
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
-    unique_elements_train, classes_train, counts_train = get_distribution(y_train)  # 获取训练集分布
-    print(f'trainset: {counts_train}')
+
+    if show_distribution:
+        unique_elements_train, classes_train, counts_train = get_distribution(y_train)  # 获取训练集分布
+        print(f'trainset: {counts_train}')
 
     model.fit(x_train, y_train)  # 模型训练
     y_test_pred_proba = model.predict_proba(x_test)
