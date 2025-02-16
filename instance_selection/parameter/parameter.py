@@ -105,4 +105,11 @@ Page_Blocks = {
     'LEARNING_RATE': 0.1
 }
 
+Pen_Digits = {
+    'DATASETNAME': 'Pen_Digits.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 100,
+    'LEARNING_RATE': 0.1
+}
+
 

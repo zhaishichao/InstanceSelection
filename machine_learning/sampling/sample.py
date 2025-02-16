@@ -1,5 +1,5 @@
 import numpy as np
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.preprocessing import StandardScaler
 
@@ -7,7 +7,7 @@ from instance_selection.operator.metrics import calculate_gmean_mauc
 from utils.dataset_utils import get_distribution
 
 
-def train_and_test(model, x_train, x_test, y_train, y_test,show_distribution=False):
+def train_and_test(model, x_train, x_test, y_train, y_test, show_distribution=False):
     scaler = StandardScaler()  # 数据的标准化
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
@@ -23,12 +23,15 @@ def train_and_test(model, x_train, x_test, y_train, y_test,show_distribution=Fal
     return gmean, mauc
 
 
-def simple_dataset(model, x_train, x_test, y_train, y_test, random_seed, method='NOS'):
+def sample_dataset(model, x_train, x_test, y_train, y_test, random_seed, method='NOS'):
     if method == 'ROS':
         ros = RandomOverSampler(random_state=random_seed)
         x_train, y_train = ros.fit_resample(x_train, y_train)
     if method == 'RUS':
         rus = RandomUnderSampler(random_state=random_seed)
         x_train, y_train = rus.fit_resample(x_train, y_train)
+    if method == 'SMOTE':
+        smote = SMOTE(random_state=random_seed)
+        x_train, y_train = smote.fit_resample(x_train, y_train)
     gmean, mauc = train_and_test(model, x_train, x_test, y_train, y_test)
     return gmean, mauc
