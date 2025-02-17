@@ -41,13 +41,6 @@ WallRobot = {
     'LEARNING_RATE': 0.1
 }
 
-Chess = {
-    'DATASETNAME': 'Chess.mat',
-    'HIDDEN_SIZE': 20,
-    'MAX_ITER': 200,
-    'LEARNING_RATE': 0.1
-}
-
 Car = {
     'DATASETNAME': 'Car.mat',
     'HIDDEN_SIZE': 20,
@@ -69,13 +62,6 @@ Ecoli = {
     'LEARNING_RATE': 0.1
 }
 
-Glass = {
-    'DATASETNAME': 'Glass.mat',
-    'HIDDEN_SIZE': 10,
-    'MAX_ITER': 2000,
-    'LEARNING_RATE': 0.1
-}
-
 Splice = {
     'DATASETNAME': 'Splice.mat',
     'HIDDEN_SIZE': 5,
@@ -83,13 +69,12 @@ Splice = {
     'LEARNING_RATE': 0.1
 }
 
-Letter = {
-    'DATASETNAME': 'Letter.mat',
+Glass = {
+    'DATASETNAME': 'Glass.mat',
     'HIDDEN_SIZE': 10,
-    'MAX_ITER': 1000,
+    'MAX_ITER': 2000,
     'LEARNING_RATE': 0.1
 }
-
 
 Dermatology = {
     'DATASETNAME': 'Dermatology.mat',
@@ -112,4 +97,30 @@ Pen_Digits = {
     'LEARNING_RATE': 0.1
 }
 
+Abalone = {
+    'DATASETNAME': 'Abalone.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 500,
+    'LEARNING_RATE': 0.1
+}
 
+Chess = {
+    'DATASETNAME': 'Chess.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 200,
+    'LEARNING_RATE': 0.1
+}
+
+Letter = {
+    'DATASETNAME': 'Letter.mat',
+    'HIDDEN_SIZE': 10,
+    'MAX_ITER': 1000,
+    'LEARNING_RATE': 0.1
+}
+
+German = {
+    'DATASETNAME': 'German.mat',
+    'HIDDEN_SIZE': 20,
+    'MAX_ITER': 500,
+    'LEARNING_RATE': 0.1
+}
