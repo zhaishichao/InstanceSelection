@@ -41,8 +41,8 @@ def clone(estimator, *, safe=True):
     """Construct a new unfitted estimator with the same parameters.
 
     Clone does a deep copy of the model in an estimator
-    without actually copying attached data. It returns a new estimator
-    with the same parameters that has not been fitted on any data.
+    without actually copying attached datasets. It returns a new estimator
+    with the same parameters that has not been fitted on any datasets.
 
     .. versionchanged:: 1.3
         Delegates to `estimator.__sklearn_clone__` if the method exists.
@@ -158,7 +158,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
     - textual and HTML representation displayed in terminals and IDEs;
     - estimator serialization;
     - parameters validation;
-    - data validation;
+    - datasets validation;
     - feature names validation.
 
     Read more in the :ref:`User Guide <rolling_your_own_estimator>`.
@@ -458,7 +458,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
         reset : bool
             Whether to reset the `feature_names_in_` attribute.
             If False, the input will be checked for consistency with
-            feature names of data provided when reset was last True.
+            feature names of datasets provided when reset was last True.
             .. note::
                It is recommended to call `reset=True` in `fit` and in the first
                call to `partial_fit`. All other methods that validate `X`
@@ -470,7 +470,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
             if feature_names_in is not None:
                 self.feature_names_in_ = feature_names_in
             elif hasattr(self, "feature_names_in_"):
-                # Delete the attribute when the estimator is fitted on a new dataset
+                # Delete the attribute when the estimator is fitted on a new mat
                 # that has no feature names.
                 delattr(self, "feature_names_in_")
             return
@@ -543,7 +543,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
         cast_to_ndarray=True,
         **check_params,
     ):
-        """Validate input data and set or check the `n_features_in_` attribute.
+        """Validate input datasets and set or check the `n_features_in_` attribute.
 
         Parameters
         ----------
@@ -571,7 +571,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
 
         reset : bool, default=True
             Whether to reset the `n_features_in_` attribute.
-            If False, the input will be checked for consistency with data
+            If False, the input will be checked for consistency with datasets
             provided when reset was last True.
             .. note::
                It is recommended to call reset=True in `fit` and in the first
@@ -584,7 +584,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
             to be used for calling check_array() on X and y respectively.
 
             `estimator=self` is automatically added to these dicts to generate
-            more informative error message in case of invalid input data.
+            more informative error message in case of invalid input datasets.
 
         cast_to_ndarray : bool, default=True
             Cast `X` and `y` to ndarray with checks in `check_params`. If
@@ -597,7 +597,7 @@ class BaseEstimator(_HTMLDocumentationLinkMixin, _MetadataRequester):
             is not False.
 
             `estimator=self` is automatically added to these params to generate
-            more informative error message in case of invalid input data.
+            more informative error message in case of invalid input datasets.
 
         Returns
         -------
@@ -737,7 +737,7 @@ class ClassifierMixin:
 
     def score(self, X, y, sample_weight=None):
         """
-        Return the mean accuracy on the given test data and labels.
+        Return the mean accuracy on the given test datasets and labels.
 
         In multi-label classification, this is the subset accuracy
         which is a harsh metric since you require for each sample that
@@ -880,7 +880,7 @@ class ClusterMixin:
         Parameters
         ----------
         X : array-like of shape (n_samples, n_features)
-            Input data.
+            Input datasets.
 
         y : Ignored
             Not used, present for API consistency by convention.
@@ -953,9 +953,9 @@ class BiclusterMixin:
         Returns
         -------
         row_ind : ndarray, dtype=np.intp
-            Indices of rows in the dataset that belong to the bicluster.
+            Indices of rows in the mat that belong to the bicluster.
         col_ind : ndarray, dtype=np.intp
-            Indices of columns in the dataset that belong to the bicluster.
+            Indices of columns in the mat that belong to the bicluster.
         """
         rows = self.rows_[i]
         columns = self.columns_[i]
@@ -988,7 +988,7 @@ class BiclusterMixin:
         i : int
             The index of the cluster.
         data : array-like of shape (n_samples, n_features)
-            The data.
+            The datasets.
 
         Returns
         -------
@@ -1042,7 +1042,7 @@ class TransformerMixin(_SetOutputMixin):
 
     def fit_transform(self, X, y=None, **fit_params):
         """
-        Fit to data, then transform it.
+        Fit to datasets, then transform it.
 
         Fits transformer to `X` and `y` with optional parameters `fit_params`
         and returns a transformed version of `X`.
@@ -1215,7 +1215,7 @@ class DensityMixin:
     _estimator_type = "DensityEstimator"
 
     def score(self, X, y=None):
-        """Return the score of the model on the data `X`.
+        """Return the score of the model on the datasets `X`.
 
         Parameters
         ----------

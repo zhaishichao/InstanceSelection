@@ -31,16 +31,16 @@ class SAMME:
     def train(self, train_data: list, learners: list):
         """
         Train the AdaBoost .
-        The training data need to be in the format: [(X, label), ...]
+        The training datasets need to be in the format: [(X, label), ...]
         The learners need to be in the format: [obj1, obj2, ...]
         The learner object need to have: a predict method that can output the predicted class. obj.predict(X) -> cat: int
-        :param train_data: training data
+        :param train_data: training datasets
         :param learners: weak learners
         :return: void
         """
 
         print("\nStart training SAMME..")
-        # initialize the weights for each data entry
+        # initialize the weights for each datasets entry
         n, m = len(train_data), len(learners)
         self.entry_weights = np.full((n,), fill_value=1/n, dtype=np.float32)
         self.learner_weights = np.zeros((m,), dtype=np.float32)

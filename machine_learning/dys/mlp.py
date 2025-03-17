@@ -178,10 +178,10 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
         Parameters
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         check_input : bool, default=True
-            Perform input data validation or not.
+            Perform input datasets validation or not.
 
         Returns
         -------
@@ -235,7 +235,7 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
             A vector comprising the flattened coefficients and intercepts.
 
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         y : ndarray of shape (n_samples,)
             The target values.
@@ -277,7 +277,7 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
         Parameters
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         y : ndarray of shape (n_samples,)
             The target values.
@@ -477,7 +477,7 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
         weights = chain(self.coefs_, self.intercepts_)
         if not all(np.isfinite(w).all() for w in weights):
             raise ValueError(
-                "Solver produced non-finite parameter weights. The input data may"
+                "Solver produced non-finite parameter weights. The input datasets may"
                 " contain large values and need to be preprocessed."
             )
         return self
@@ -714,12 +714,12 @@ class BaseMultilayerPerceptron(BaseEstimator, metaclass=ABCMeta):
 
     @_fit_context(prefer_skip_nested_validation=True)
     def fit(self, X, y):
-        """Fit the model to data matrix X and target(s) y.
+        """Fit the model to datasets matrix X and target(s) y.
 
         Parameters
         ----------
         X : ndarray or sparse matrix of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         y : ndarray of shape (n_samples,) or (n_samples, n_outputs)
             The target values (class labels in classification, real numbers in
@@ -827,7 +827,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
         Maximum number of iterations. The solver iterates until convergence
         (determined by 'tol') or this number of iterations. For stochastic
         solvers ('sgd', 'adam'), note that this determines the number of epochs
-        (how many times each data point will be used), not the number of
+        (how many times each datasets point will be used), not the number of
         gradient steps.
 
     shuffle : bool, default=True
@@ -866,7 +866,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
     early_stopping : bool, default=False
         Whether to use early stopping to terminate training when validation
         score is not improving. If set to true, it will automatically set
-        aside 10% of training data as validation and terminate training when
+        aside 10% of training datasets as validation and terminate training when
         validation score is not improving by at least ``tol`` for
         ``n_iter_no_change`` consecutive epochs. The split is stratified,
         except in a multilabel setting.
@@ -876,7 +876,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
         Only effective when solver='sgd' or 'adam'.
 
     validation_fraction : float, default=0.1
-        The proportion of training data to set aside as validation set for
+        The proportion of training datasets to set aside as validation set for
         early stopping. Must be between 0 and 1.
         Only used if early_stopping is True.
 
@@ -980,7 +980,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
     It can also have a regularization term added to the loss function
     that shrinks model parameters to prevent overfitting.
 
-    This implementation works with data represented as dense numpy arrays or
+    This implementation works with datasets represented as dense numpy arrays or
     sparse scipy arrays of floating point values.
 
     References
@@ -1119,7 +1119,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
                 )
 
         # This downcast to bool is to prevent upcasting when working with
-        # float32 data
+        # float32 datasets
         y = self._label_binarizer.transform(y).astype(bool)
         return X, y
 
@@ -1129,7 +1129,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
         Parameters
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         Returns
         -------
@@ -1156,12 +1156,12 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
     @available_if(lambda est: est._check_solver())
     @_fit_context(prefer_skip_nested_validation=True)
     def partial_fit(self, X, y, classes=None):
-        """Update the model with a single iteration over the given data.
+        """Update the model with a single iteration over the given datasets.
 
         Parameters
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         y : array-like of shape (n_samples,)
             The target values.
@@ -1169,7 +1169,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
         classes : array of shape (n_classes,), default=None
             Classes across all calls to partial_fit.
             Can be obtained via `np.unique(y_all)`, where y_all is the
-            target vector of the entire dataset.
+            target vector of the entire mat.
             This argument is required for the first call to partial_fit
             and can be omitted in the subsequent calls.
             Note that y doesn't need to contain all labels in `classes`.
@@ -1194,7 +1194,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         Returns
         -------
@@ -1212,7 +1212,7 @@ class MLPClassifier(ClassifierMixin, BaseMultilayerPerceptron):
         Parameters
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The input data.
+            The input datasets.
 
         Returns
         -------
@@ -1246,7 +1246,7 @@ if __name__ == '__main__':
 
     # 加载鸢尾花数据集
     # iris = load_iris()
-    # X = iris.data  # 特征
+    # X = iris.datasets  # 特征
     # y = iris.target  # 标签
 
     # 数据预处理

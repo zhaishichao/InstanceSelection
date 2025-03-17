@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     # 加载鸢尾花数据集
     # iris = load_iris()
-    # X = iris.data  # 特征
+    # X = iris.datasets  # 特征
     # y = iris.target  # 标签
 
     # 数据预处理

@@ -1,5 +1,4 @@
 from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score
 from sklearn.base import clone
 import numpy as np
 
@@ -36,7 +35,7 @@ def k_fold_cross_validation(model, X, y, n_splits=5, method='soft', random_state
     soft_labels = np.zeros((len(y), len(np.unique(y))))  # Initialize array for soft labels
     # scores = []
     for train_index, test_index in kf.split(X):
-        # Split data into train and test
+        # Split datasets into train and test
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
         # Clone and fit the model on the training set
