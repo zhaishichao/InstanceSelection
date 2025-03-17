@@ -1,5 +1,5 @@
 import numpy as np
-from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN, BorderlineSMOTE, KMeansSMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.preprocessing import StandardScaler
 
@@ -25,13 +25,17 @@ def train_and_test(model, x_train, x_test, y_train, y_test, show_distribution=Fa
 
 def sample_dataset(model, x_train, x_test, y_train, y_test, random_seed, method='NOS'):
     if method == 'ROS':
-        ros = RandomOverSampler(random_state=random_seed)
-        x_train, y_train = ros.fit_resample(x_train, y_train)
+        x_train, y_train = RandomOverSampler(random_state=random_seed).fit_resample(x_train, y_train)
     if method == 'RUS':
-        rus = RandomUnderSampler(random_state=random_seed)
-        x_train, y_train = rus.fit_resample(x_train, y_train)
+        x_train, y_train = RandomUnderSampler(random_state=random_seed).fit_resample(x_train, y_train)
     if method == 'SMOTE':
-        smote = SMOTE(random_state=random_seed)
-        x_train, y_train = smote.fit_resample(x_train, y_train)
+        x_train, y_train = SMOTE(random_state=random_seed).fit_resample(x_train, y_train)
+    if method == 'ADASYN':
+        x_train, y_train = ADASYN(random_state=random_seed).fit_resample(x_train, y_train)
+    if method == 'BorderlineSMOTE':
+        x_train, y_train = BorderlineSMOTE(random_state=random_seed).fit_resample(x_train, y_train)
+    if method == 'KMeansSMOTE':
+        x_train, y_train = KMeansSMOTE(random_state=random_seed, cluster_balance_threshold=0.15).fit_resample(x_train,
+                                                                                                           y_train)
     gmean, mauc = train_and_test(model, x_train, x_test, y_train, y_test)
     return gmean, mauc
