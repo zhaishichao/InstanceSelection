@@ -1,6 +1,6 @@
 # 数据集路径
-IMBALANCED_DATASET_PATH = '../../data/dataset/imbalance/'
-DATASET_PATH = '../../data/dataset/'
+IMBALANCED_DATASET_PATH = '../../datasets/mat/imbalance/'
+DATASET_PATH = '../../datasets/mat/'
 # MLP参数设置
 N_SPLITS = 5  # k-fold交叉验证的折数
 LEARNING_RATE = 0.1  # 学习率
@@ -31,6 +31,7 @@ Balance_Scale = DatasetConfig('Balance_Scale.mat', 15, 500, 0.1)
 Ecoli = DatasetConfig('Ecoli.mat', 5, 200, 0.1)
 Splice = DatasetConfig('Splice.mat', 5, 100, 0.1)
 Glass = DatasetConfig('Glass.mat', 10, 2000, 0.1)
+Glass_Init = DatasetConfig('Glass_Init.mat', 10, 2000, 0.1)
 Dermatology = DatasetConfig('Dermatology.mat', 2, 1000, 0.1)
 Page_Blocks = DatasetConfig('Page_Blocks.mat', 20, 100, 0.1)
 Pen_Digits = DatasetConfig('Pen_Digits.mat', 20, 100, 0.1)
@@ -40,3 +41,10 @@ Chess2 = DatasetConfig('Chess2.mat', 20, 200, 0.1)
 Letter = DatasetConfig('Letter.mat', 10, 1000, 0.1)
 German = DatasetConfig('German.mat', 20, 500, 0.1)
 Yeast = DatasetConfig('Yeast.mat', 20, 500, 0.1)
+USPS = DatasetConfig('USPS.mat', 20, 300, 0.1)
+GuesterPhase = DatasetConfig('GuesterPhase.mat', 50, 400, 0.1)
+Connect = DatasetConfig('Connect.mat', 20, 400, 0.1)
+Hayes_Roth = DatasetConfig('Hayes_Roth.mat', 20, 100, 0.1)
+Wine = DatasetConfig('Wine.mat', 20, 100, 0.1)
+Penbased = DatasetConfig('Penbased.mat', 15, 100, 0.1)
+LedDisplay = DatasetConfig('LedDisplay.mat', 10, 100, 0.1)
