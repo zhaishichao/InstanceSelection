@@ -3,7 +3,20 @@ from sklearn.metrics import accuracy_score
 from sklearn.base import clone
 import numpy as np
 
+# 删除指定类别的数据
+def remove_class(X, y, class_to_remove):
+    """
+    删除指定类别的数据
 
+    :param X: ndarray, 特征数据, shape (n_samples, n_features)
+    :param y: ndarray, 标签数据, shape (n_samples,)
+    :param class_to_remove: int, 要删除的类别
+    :return: (X_new, y_new) 删除该类别后的特征数据和标签
+    """
+    mask = y != class_to_remove  # 生成掩码，筛选出不等于 class_to_remove 的样本
+    X_new = X[mask]  # 过滤特征
+    y_new = y[mask]  # 过滤标签
+    return X_new, y_new
 def k_fold_cross_validation(model, X, y, n_splits=5, method='soft', random_state=42):
     """
     Perform 5-fold cross-validation and generate soft labels (probability predictions).
