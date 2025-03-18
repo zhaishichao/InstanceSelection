@@ -29,13 +29,13 @@ def sample_dataset(model, x_train, x_test, y_train, y_test, random_seed, method=
     if method == 'RUS':
         x_train, y_train = RandomUnderSampler(random_state=random_seed).fit_resample(x_train, y_train)
     if method == 'SMOTE':
-        x_train, y_train = SMOTE(random_state=random_seed).fit_resample(x_train, y_train)
+        x_train, y_train = SMOTE(random_state=random_seed, k_neighbors=2).fit_resample(x_train, y_train)
     if method == 'ADASYN':
         x_train, y_train = ADASYN(random_state=random_seed).fit_resample(x_train, y_train)
     if method == 'BorderlineSMOTE':
-        x_train, y_train = BorderlineSMOTE(random_state=random_seed).fit_resample(x_train, y_train)
+        x_train, y_train = BorderlineSMOTE(random_state=random_seed, k_neighbors=2).fit_resample(x_train, y_train)
     if method == 'KMeansSMOTE':
-        x_train, y_train = KMeansSMOTE(random_state=random_seed, cluster_balance_threshold=0.15).fit_resample(x_train,
+        x_train, y_train = KMeansSMOTE(random_state=random_seed, cluster_balance_threshold=0.2).fit_resample(x_train,
                                                                                                            y_train)
     gmean, mauc = train_and_test(model, x_train, x_test, y_train, y_test)
     return gmean, mauc
