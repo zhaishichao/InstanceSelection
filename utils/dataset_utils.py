@@ -1,6 +1,7 @@
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.base import clone
 import numpy as np
+
 
 # 删除指定类别的数据
 def remove_class(X, y, class_to_remove):
@@ -16,6 +17,8 @@ def remove_class(X, y, class_to_remove):
     X_new = X[mask]  # 过滤特征
     y_new = y[mask]  # 过滤标签
     return X_new, y_new
+
+
 def k_fold_cross_validation(model, X, y, n_splits=5, method='soft', random_state=42):
     """
     Perform 5-fold cross-validation and generate soft labels (probability predictions).
@@ -31,10 +34,14 @@ def k_fold_cross_validation(model, X, y, n_splits=5, method='soft', random_state
     - soft_labels: A numpy array containing the soft labels for each sample.
     - scores: A list of accuracy scores for each fold.
     """
-    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)  # 5-fold cross-validation
+    # StratifiedKFold
+    # StratifiedKFold 是 KFold 的一个变体，专门用于分类问题中的分层抽样
+    # 在每一折中，训练集和测试集中的类别分布与原始数据集中的类别分布一致
+    # 适用于分类问题，尤其是当类别分布不均衡时
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)  # 5-fold cross-validation
     soft_labels = np.zeros((len(y), len(np.unique(y))))  # Initialize array for soft labels
     # scores = []
-    for train_index, test_index in kf.split(X):
+    for train_index, test_index in kf.split(X, y):
         # Split datasets into train and test
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -63,7 +70,7 @@ def get_distribution(y):
     # 使用 numpy.unique 获取类别、计数以及每个类别对应的索引
     unique_elements, counts = np.unique(y, return_counts=True)
     # 构造每个类别的索引列表
-    class_indices=[]
+    class_indices = []
     for element in unique_elements:
         class_indices.append(np.where(y == element)[0])
     return unique_elements, class_indices, counts
