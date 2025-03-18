@@ -27,7 +27,7 @@ def init_toolbox_emosaic(model, x_train, y_train, n_splits=5, random_seed=42):
     toolbox.register("mutate", mutate_binary_inversion)  # 二进制突变
     toolbox.register("select", selNSGA2)  # NSGA-II选择（非支配排序后）
     toolbox.register("individuals_constraints", individuals_constraints_in_classes, x_train=x_train,
-                     y_train=y_train)  # 限制每个类至少有一个实例被选择
+                     y_train=y_train, min_samples=5)  # 限制每个类至少有一个实例被选择
     toolbox.register("remove_duplicates", remove_duplicates, penalty_factor=0.0)  # 去重
     return toolbox
 

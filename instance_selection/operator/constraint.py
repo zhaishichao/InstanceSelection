@@ -37,7 +37,7 @@ def get_feasible_infeasible(pop, constraints):
 ######################################
 
 # 限制每个类至少有一个实例被选择
-def individuals_constraints_in_classes(individuals, x_train, y_train):
+def individuals_constraints_in_classes(individuals, x_train, y_train, min_samples=5):
     '''
     如果存在未选择的类别；
     则在1-length（该类实例个数）之间生成一个随机数random_number；
@@ -62,7 +62,7 @@ def individuals_constraints_in_classes(individuals, x_train, y_train):
         unselected_set = unique_elements_set - unique_elements_sub_set
         # 如果差集不为空，则表示存在类没有被选择
         for selected_element, count in zip(unique_elements_sub, counts_sub):
-            if count < 5:
+            if count < min_samples:
                 # 将该类标签添加到unselected_set中
                 unselected_set.add(selected_element)
         if len(unselected_set) > 0:
