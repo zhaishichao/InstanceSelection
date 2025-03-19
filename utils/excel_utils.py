@@ -20,7 +20,7 @@ def save_to_excel_2(save_path, filename, columns, data):
     os.makedirs(save_path, exist_ok=True)
 
     # 创建 Excel 文件完整路径
-    file_path = os.path.join(save_path, filename)
+    file_path = os.path.join(save_path, filename + ".xlsx")
 
     # 创建 Excel 工作簿和工作表
     wb = openpyxl.Workbook()
