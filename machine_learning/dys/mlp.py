@@ -1255,7 +1255,7 @@ if __name__ == '__main__':
     y_onehot = encoder.fit_transform(y.reshape(-1, 1))
 
     # 划分训练集和测试集
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=RANDOM_SEED)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=RANDOM_SEED)
 
     # 标准化特征
     scaler = StandardScaler()  # 数据的标准化
