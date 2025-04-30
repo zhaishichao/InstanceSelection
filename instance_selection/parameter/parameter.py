@@ -4,7 +4,7 @@ DATASET_PATH = '../../datasets/mat/'
 # MLP参数设置
 N_SPLITS = 5  # k-fold交叉验证的折数
 LEARNING_RATE = 0.1  # 学习率
-RANDOM_SEED = 42
+RANDOM_SEED = 42+1
 
 # 遗传算法迭代参数设置
 NGEN = 30  # 迭代次数
