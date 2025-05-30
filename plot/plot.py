@@ -28,7 +28,7 @@ ax.set_yticks(np.arange(0.83, 0.91, 0.01))
 
 # Plot lines with markers (starting at x=0)
 line1, = ax.plot(x, y1, 'o-', color='#1f77b4', markersize=8, linewidth=1.5, label='E-MOSAIC',zorder=100)
-line2, = ax.plot(x, y2, 'o-', color='#ff7f0e', markersize=8, linewidth=1.5, label='MILE',zorder=100)
+line2, = ax.plot(x, y2, 'o-', color='#ff7f0e', markersize=8, linewidth=1.5, label='mile',zorder=100)
 
 # Labels with Times New Roman (size 12)
 ax.set_xlabel('Generation', fontsize=14)
