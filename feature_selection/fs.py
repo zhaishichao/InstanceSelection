@@ -1,6 +1,6 @@
 import scipy.io as sio  # 从.mat文件中读取数据集
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 from utils.dataset_utils import get_distribution
 
@@ -20,6 +20,9 @@ class FeatureSelection():
         mat_data = sio.loadmat(DATASET_PATH + dataset['DATASETNAME'])  # 加载、划分数据集
         x = mat_data['X']
         y = mat_data['Y'][:, 0]  # mat_data['Y']得到的形状为[n,1]，通过[:,0]，得到形状[n,]
+        # 对y进行编码，使其标签为从0开始0，1，2，3...
+        encoder = LabelEncoder()
+        y = encoder.fit_transform(y)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=random_state,
                                                             stratify=y)  # 划分数据集
         if standard:
