@@ -24,7 +24,7 @@ class DataSetConfig:
 
 
 # 数据集配置
-GLIOMA = DataSetConfig('GLIOMA.mat', 5, 200, 0.001, 5)
+GLIOMA = DataSetConfig('GLIOMA.mat', 5, 200, 0.001, 4)
 Lung = DataSetConfig('Lung.mat', 10, 100, 0.001, 3)
 Ovarian = DataSetConfig('Ovarian.mat', 10, 150, 0.001, 3)
 Semeion = DataSetConfig('Semeion.mat', 10, 150, 0.001, 5)

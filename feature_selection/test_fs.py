@@ -10,7 +10,7 @@ import warnings
 fs = FeatureSelection(Datasets)
 
 # 数据预处理
-fs.pre_process(Datasets[1], random_state=42)
+fs.pre_process(Datasets[6], random_state=42)
 fs.display_distribution()
 # 前后结果对比（原始数据、SMOTE、特征选择+SMOTE）
 model = MLPClassifier(hidden_layer_sizes=(fs.dataset.HIDDEN_SIZE,), max_iter=fs.dataset.MAX_ITER,
