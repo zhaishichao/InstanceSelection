@@ -44,3 +44,9 @@ Datasets = [GLIOMA, Lung, Ovarian, Semeion, LSVT, Armstrong_2002_v1, Gordon_2002
 
 Datasets_2 = [Armstrong_2002_v1, Gordon_2002, Colon, Yeoh_2002_v1, DLBCL, CNS,
             Brain2, Tumor, GLI_85]
+
+Datasets_3 = [CNS, Brain2, Tumor, GLI_85]
+
+
+Datasets_test = [GLIOMA, Lung, Ovarian, Semeion, Armstrong_2002_v1, Gordon_2002, Colon, Yeoh_2002_v1, CNS,
+            Brain2, Tumor, GLI_85]
