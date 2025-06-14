@@ -26,7 +26,7 @@ class FeatureSelection():
         # 对y进行编码，使其标签为从0开始0，1，2，3...
         encoder = LabelEncoder()
         y = encoder.fit_transform(y)
-        _, _, self.distribution = get_distribution(self.y_train)  # 获取类分布
+        _, _, self.distribution = get_distribution(y)  # 获取类分布
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=random_state,
                                                             stratify=y)  # 划分数据集
         if standard:
