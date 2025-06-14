@@ -39,13 +39,14 @@ Brain2 = DataSetConfig('Brain2.mat', 5, 200, 0.001, 3)
 Tumor = DataSetConfig('11Tumor.mat', 20, 200, 0.001, 3)
 GLI_85 = DataSetConfig('GLI-85.mat', 15, 200, 0.001, 3)
 
-Datasets = [GLIOMA, Lung, Ovarian, Semeion, LSVT, Armstrong_2002_v1, Gordon_2002, Colon, Yeoh_2002_v1, DLBCL, CNS,
-            Brain2, Tumor, GLI_85]
+Datasets = [GLIOMA, Lung, Ovarian, Semeion, LSVT, Armstrong_2002_v1, Gordon_2002, Colon, Yeoh_2002_v1, DLBCL, GLI_85]
 
 Datasets_2 = [Armstrong_2002_v1, Gordon_2002, Colon, Yeoh_2002_v1, DLBCL, CNS,
             Brain2, Tumor, GLI_85]
 
-Datasets_3 = [CNS, Brain2, Tumor, GLI_85]
+# Datasets_3 = [CNS, Brain2, Tumor, GLI_85]
+Datasets_3 = [GLI_85]
+
 
 
 Datasets_test = [GLIOMA, Lung, Ovarian, Semeion, Armstrong_2002_v1, Gordon_2002, Colon, Yeoh_2002_v1, CNS,
