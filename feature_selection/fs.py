@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 from utils.dataset_utils import get_distribution
 
-DATASET_PATH = 'E:/workspace/zsc/python/InstanceSelection/datasets/mat/feature_selection/'
+DATASET_PATH = '../datasets/mat/feature_selection/'
 
 class FeatureSelection():
     def __init__(self, datasets, num_run=None):
